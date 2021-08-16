@@ -1,0 +1,4 @@
+<!DOCTYPE html>
+<html>
+<body style="overflow: hidden; cursor: none; background-color: black;">
+<script>
