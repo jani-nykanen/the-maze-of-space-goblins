@@ -98,7 +98,7 @@ export class Stage {
 
         const SRCX = [0];
 
-        let bmp = canvas.data.getBitmap("art");
+        let bmp = canvas.data.getBitmap("art1");
 
         let tid : number;
 
@@ -140,7 +140,7 @@ export class Stage {
         const SMALL_STARS = [[1, 1], [4, 5], [14,6], [3, 11], [12, 12], [7, 13], [16, 13], [5, 17], [9, 0]];
         const BIG_STARS = [[8, 3], [9, 9], [14, 16], [16, 3], [19, 9]];
 
-        let bmp = canvas.data.getBitmap("art");
+        let bmp = canvas.data.getBitmap("art1");
 
         let x : number;
         let y : number;

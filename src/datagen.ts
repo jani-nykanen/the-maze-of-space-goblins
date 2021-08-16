@@ -120,6 +120,8 @@ export class DataGenerator {
 
     private convertToRGB222(image : HTMLImageElement, paletteMap : Array<number[]>) : HTMLCanvasElement {
 
+        const TRANSPARENT = [-1, -1, -1, -1];
+
         let canvas = document.createElement("canvas");
         canvas.width = image.width;
         canvas.height = image.height;
@@ -143,6 +145,8 @@ export class DataGenerator {
             for (let x = 0; x < w; ++ x) {
 
                 paletteData = paletteMap[y*w + x];
+                if (paletteData == null)
+                    paletteData = TRANSPARENT;
     
                 for (let j = 0; j < 8; ++ j) {
 
@@ -210,7 +214,15 @@ export class DataGenerator {
     }
 
 
-    public generateColorBitmap(name : string, url : string, paletteMap : Array<number[]>) {
+    public generateColorBitmap(name : string, image : HTMLImageElement, 
+        paletteMap : Array<number[]>) {
+
+        this.bitmaps.push(new KeyValuePair<Bitmap> (name, 
+            this.convertToRGB222(image, paletteMap) ));
+    }
+
+
+    public loadImage(path : string, callback : (img : HTMLImageElement) => void) {
 
         let image = new Image();
 
@@ -219,10 +231,9 @@ export class DataGenerator {
 
             ++ this.itemsLoaded;
             
-            this.bitmaps.push(new KeyValuePair<Bitmap> (name, 
-                this.convertToRGB222(image, paletteMap) ));
+            callback(image);
         }
-        image.src = url;
+        image.src = path;
     }
 
 

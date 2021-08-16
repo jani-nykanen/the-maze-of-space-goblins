@@ -29,6 +29,10 @@ export class GameScene implements Scene {
         canvas.moveTo();
 
         this.stage.draw(canvas);
+
+        canvas.drawBitmap(canvas.data.getBitmap("art1"), 0, 0);
+        canvas.drawBitmap(canvas.data.getBitmap("art2"), 0, 16);
+        canvas.drawBitmap(canvas.data.getBitmap("art3"), 0, 32);
     }
     
     

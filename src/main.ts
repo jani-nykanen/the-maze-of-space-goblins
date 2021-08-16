@@ -3,38 +3,72 @@ import { GameScene } from "./game.js";
 
 
 const BRICK = [0, 0b100000, 0b110100, 0b111000]; 
-const EMPTY = [-1, -1, -1, -1];
 
 const UFO1 = [0, -1, 0b001011, 0b101111]; 
 const UFO2 = [0, -1, 0b001011, 0b101010]; 
 
-const ASTEROID1 = [0, -1, 0b101000, 0b111110]; 
-const ASTEROID2 = [0, -1, 0b101000, 0b010100]; 
+const ROCK1 = [0, -1, 0b101000, 0b111110]; 
+const ROCK2 = [0, -1, 0b101000, 0b010100]; 
 
 const STAR = [0, 0, 0b101011, 0b111111]; 
 
-const RUBBLE1 = [0, 0b010100, 0b101001, 0b111110];
+const ALIEN_GREEN_1 = [0, -1, 0b111110, 0b101000];
+const ALIEN_GREEN_2 = [0, -1, 0b010100, 0b101000];
 
-const ICON1 = [0, -1, 0b111000, 0b111101]; 
-const ICON2 = [0, -1, 0b011000, 0b111111]; 
+const ALIEN_BLUE_1 = [0, -1, 0b101111, 0b011011];
+const ALIEN_BLUE_2 = [0, -1, 0b000110, 0b011011];
 
-const PSTAR1 = [0, -1, 0b111101, 0b111000];
-const PSTAR2 = [0, -1, 0b100100, 0b111000];
+const ALIEN_YELLOW_1 = [0, -1, 0b111110, 0b111000];
+const ALIEN_YELLOW_2 = [0, -1, 0b100100, 0b111000]
+
+const FACE = [0, -1, 0b101010, 0b111111];
 
 
-const PALETTE = [
+const PALETTE_1 = [
 
     // Line 1
     BRICK, BRICK, UFO1, UFO1, UFO1, UFO1, UFO1, UFO1,
-    ASTEROID1, ASTEROID1, STAR, EMPTY, RUBBLE1, RUBBLE1, ICON1, ICON1,
-    PSTAR1, PSTAR2, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
-    EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+    ROCK1, ROCK1, STAR, null, ALIEN_GREEN_1, ALIEN_GREEN_2, ALIEN_GREEN_1, ALIEN_GREEN_2,
+    ALIEN_GREEN_1, ALIEN_GREEN_2,  FACE, FACE, null, null, null, null,
+    null,  null,  null, null, null, null, null, null,
 
     // Line 2
     BRICK, BRICK, UFO2, UFO2, UFO2, UFO2, UFO2, UFO2,
-    ASTEROID2, ASTEROID2, STAR, EMPTY, RUBBLE1, RUBBLE1, ICON2, EMPTY,
-    PSTAR2, PSTAR2, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
-    EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
+    ROCK2, ROCK2, STAR, null, ALIEN_GREEN_2, ALIEN_GREEN_2, ALIEN_GREEN_2, ALIEN_GREEN_2, 
+    ALIEN_GREEN_2, ALIEN_GREEN_2,  FACE, null, null, null, null, null,
+    null,  null,  null, null, null, null, null, null,
+];
+
+
+const PALETTE_2 = [
+
+    // Line 1
+    null, null, null, null, null, null, null, null,
+    null, null, null, null, ALIEN_BLUE_1, ALIEN_BLUE_2, ALIEN_BLUE_1, ALIEN_BLUE_2,
+    ALIEN_BLUE_1, ALIEN_BLUE_2,  null, null, null, null, null, null,
+    null,  null,  null, null, null, null, null, null,
+
+    // Line 2
+    null, null, null, null, null, null, null, null,
+    null, null, null, null, ALIEN_BLUE_2, ALIEN_BLUE_2, ALIEN_BLUE_2, ALIEN_BLUE_2, 
+    ALIEN_BLUE_2, ALIEN_BLUE_2,  null, null, null, null, null, null,
+    null,  null,  null, null, null, null, null, null,
+];
+
+
+const PALETTE_3 = [
+
+    // Line 1
+    null, null, null, null, null, null, null, null,
+    null, null, null, null, ALIEN_YELLOW_1, ALIEN_YELLOW_2, ALIEN_YELLOW_1, ALIEN_YELLOW_2,
+    ALIEN_YELLOW_1, ALIEN_YELLOW_2,  null, null, null, null, null, null,
+    null,  null,  null, null, null, null, null, null,
+
+    // Line 2
+    null, null, null, null, null, null, null, null,
+    null, null, null, null, ALIEN_YELLOW_2, ALIEN_YELLOW_2, ALIEN_YELLOW_2, ALIEN_YELLOW_2, 
+    ALIEN_YELLOW_2, ALIEN_YELLOW_2,  null, null, null, null, null, null,
+    null,  null,  null, null, null, null, null, null,
 ];
 
 
@@ -49,5 +83,11 @@ window.onload = () => (new Core(160, 144))
     .run(GameScene, event => {
 
         event.data.generateBitmapFont("font1", "Arial", 10, 256, 256);
-        event.data.generateColorBitmap("art", "art.png", PALETTE);
+
+        event.data.loadImage("art.png", img => {
+            
+            event.data.generateColorBitmap("art1", img, PALETTE_1);
+            event.data.generateColorBitmap("art2", img, PALETTE_2);
+            event.data.generateColorBitmap("art3", img, PALETTE_3);
+        });
     });
