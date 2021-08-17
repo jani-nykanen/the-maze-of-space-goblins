@@ -23,6 +23,7 @@ export class Stage {
 
 
     private staticLayer : Array<number>;
+    private objectLayer : Array<number>;
 
     private agents : Array<Agent>;
     private particles : Array<Particle>;
@@ -42,6 +43,8 @@ export class Stage {
 
         this.staticLayer = Array.from(MAP_DATA)
             .map(i => (STATIC_TILES.includes(i) ? i : 0));
+        this.objectLayer = Array.from(MAP_DATA)
+            .map(i => (i >= 2 && i <= 6 ? (i-1) : 0));
 
         this.agents = new Array<Agent> ();
         this.sparkTimes = (new Array<number> (10))
@@ -58,7 +61,7 @@ export class Stage {
 
     private parseObjects() {
 
-        const MOVE_TIME = 16;
+        const MOVE_TIME = 12;
 
         let tid : number;
         let i : number;
@@ -108,9 +111,35 @@ export class Stage {
             p.update(event);
         }
 
+        let anyMoving = false;
         for (let a of this.agents) {
 
-            a.update(event);
+            if (a.isMoving()) {
+
+                anyMoving = true;
+                break;
+            }
+        }
+        
+        let somethingMoved = false;
+        if (!anyMoving) {
+            
+            do {
+
+                somethingMoved = false;
+
+                for (let a of this.agents) {
+
+                    if (a.control(this, event))
+                        somethingMoved = true;
+                }
+            }
+            while (somethingMoved);
+        }
+
+        for (let a of this.agents) {
+
+            a.update(this, event);
         }
     }
 
@@ -233,6 +262,44 @@ export class Stage {
                 .spawn(pos, speed, LIFE_TIME, color,
                     (1 + Math.random() * 2) | 0);
         }
+    }
+
+
+    public isSolid(x : number, y : number, canTouchStar = false) : boolean {
+
+        let tid = this.staticLayer[y * this.width + x];
+        if (tid == 1 || (!canTouchStar && tid == 7))
+            return true;
+
+        return this.objectLayer[y * this.width + x] > 0; 
+    }
+
+
+    public markObjectTile(x : number, y : number, newValue : number) {
+
+        this.objectLayer[y * this.width + x] = newValue;
+    }
+
+
+    public isPlayerInDirection(x : number, y : number, 
+        dirx : number, diry : number) : boolean {
+
+        let i : number;
+        do {
+
+            x += dirx;
+            y += diry;
+
+            i = y * this.width + x;
+
+            if (this.objectLayer[i] == 1)
+                return true;
+        }
+        while(this.staticLayer[i] == 0 &&
+            this.objectLayer[i] != 0 &&
+            x > 0 && y > 0 && x < this.width-1 && y < this.height-1);
+
+        return false;
     }
 
 }
