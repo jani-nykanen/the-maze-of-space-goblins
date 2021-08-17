@@ -1,6 +1,7 @@
 import { Canvas } from "./canvas.js";
 import { CoreEvent, Scene } from "./core.js";
 import { DataGenerator } from "./datagen.js";
+import { State } from "./keyboard.js";
 import { Stage } from "./stage.js";
 
 
@@ -20,6 +21,11 @@ export class GameScene implements Scene {
     public update(event : CoreEvent) {
       
         this.stage.update(event);
+
+        if (event.keyboard.getActionState("back") == State.Pressed) {
+
+            this.stage.undo();
+        }
     }
 
 

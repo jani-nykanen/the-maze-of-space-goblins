@@ -1,9 +1,8 @@
 import { Agent } from "./agent.js";
 import { Canvas } from "./canvas.js";
 import { CoreEvent } from "./core.js";
-import { DataGenerator } from "./datagen.js";
 import { MAP_DATA, MAP_HEIGHT, MAP_WIDTH } from "./mapdata.js";
-import { clamp, negMod } from "./math.js";
+import { negMod } from "./math.js";
 import { Particle } from "./particle.js";
 import { nextObject } from "./types.js";
 import { Vector2 } from "./vector.js";
@@ -13,6 +12,15 @@ const STATIC_TILES = [1, 7];
 
 const FIRST_MONSTER = 3;
 const LAST_MONSTER = 5;
+
+const MOVE_TIME = 12;
+
+
+const PARTICLE_PALETTES = [
+    [0b000100, 0b101100, 0b011000],
+    [0b000110, 0b101111, 0b011011],
+    [0b100100, 0b111110, 0b111000]
+];
 
 
 export const enum ItemEffect {
@@ -27,6 +35,7 @@ export class Stage {
 
     private staticLayer : Array<number>;
     private objectLayer : Array<number>;
+    private objectLayerStack : Array<Array<number>>;
 
     private agents : Array<Agent>;
     private particles : Array<Particle>;
@@ -35,7 +44,7 @@ export class Stage {
     private starPos : number;
 
     private checkMade : boolean; // Heh, check mate
-
+    private waitTimer : number;
 
     public readonly width : number;
     public readonly height : number;
@@ -51,6 +60,8 @@ export class Stage {
         this.objectLayer = Array.from(MAP_DATA)
             .map(i => (i >= 2 && i <= 6 ? (i-1) : 0));
 
+        this.objectLayerStack = new Array<Array<number>> ();
+
         this.agents = new Array<Agent> ();
         this.sparkTimes = (new Array<number> (10))
             .fill(0)
@@ -63,12 +74,11 @@ export class Stage {
         this.starPos = 0;
 
         this.checkMade = true;
+        this.waitTimer = 0;
     }
 
 
     private parseObjects() {
-
-        const MOVE_TIME = 12;
 
         let tid : number;
         let i : number;
@@ -176,7 +186,7 @@ export class Stage {
     }
 
 
-    private checkConnections() {
+    private checkConnections() : boolean {
 
         let neighborCount = (new Array<number> (this.width*this.height)).fill(0);
   
@@ -196,6 +206,7 @@ export class Stage {
         }
 
         // Second round: mark to be destroyed
+        let destroy : boolean;
         for (let y = 0; y < this.height; ++ y) {
 
             for (let x = 0; x < this.width; ++ x) {
@@ -205,8 +216,9 @@ export class Stage {
                     this.objectLayer[i] > LAST_MONSTER)
                     continue;
 
-                if (this.checkIfDestroyable(x, y, 
-                    this.objectLayer[i], neighborCount)) {
+                if (neighborCount[i] >= 2 ||
+                    this.checkIfDestroyable(x, y, 
+                        this.objectLayer[i], neighborCount)) {
 
                     // Go through all agents and find one to be destroyed
                     // (a bit slow, I know)
@@ -214,18 +226,67 @@ export class Stage {
 
                         a.markForDestruction(x, y);
                     }
+
+                    destroy = true;
                 }
             }
+        }
+
+        return destroy;
+    }
+
+
+    private spawnParticles(x : number, y : number, 
+        minSpeed : number, maxSpeed : number,
+        count : number, palette : Array<number>) {
+
+        const LIFE_TIME = 24;
+
+        let pos = new Vector2(x, y);
+        let speed : Vector2;
+        let angle : number;
+        let color : number;
+
+        for (let i = 0; i < count; ++ i) {
+
+            angle = Math.random() * Math.PI * 2;
+
+            speed = Vector2.scalarMultiply(
+                new Vector2(Math.cos(angle), Math.sin(angle)),
+                Math.random() * (maxSpeed - minSpeed) + minSpeed);
+
+            color = palette[(Math.random() * palette.length) | 0];
+
+            nextObject(this.particles, Particle)
+                .spawn(pos, speed, LIFE_TIME, color,
+                    (1 + Math.random() * 2) | 0);
         }
     }
 
 
     private destroy(event : CoreEvent) {
 
+        let p : Vector2;
         for (let a of this.agents) {
 
-            a.kill(this);
+            if (a.kill(this)) {
+
+                p = a.getRenderPos();
+
+                this.spawnParticles(p.x + 8, p.y + 8, 
+                    0.5, 1.0, 24, PARTICLE_PALETTES[a.id-2]);
+            }
         }
+    }
+
+
+    private storeMove() {
+
+        const MAX_LENGTH = 64;
+
+        this.objectLayerStack.push(Array.from(this.objectLayer));
+        if (this.objectLayerStack.length > MAX_LENGTH)
+            this.objectLayerStack.shift();
     }
 
 
@@ -248,26 +309,37 @@ export class Stage {
             
             if (!this.checkMade) {
 
-                this.checkConnections();
-                this.destroy(event);
+                this.storeMove();
 
                 this.checkMade = true;
-            }
+                if (this.checkConnections()) {
 
-            do {
-
-                somethingMoved = false;
-
-                for (let a of this.agents) {
-
-                    if (a.control(this, event))
-                        somethingMoved = true;
+                    this.destroy(event);
+                    this.waitTimer = MOVE_TIME;
                 }
-
-                if (somethingMoved)
-                    this.checkMade = false;
             }
-            while (somethingMoved);
+
+            if (this.waitTimer <= 0) {
+
+                do {
+
+                    somethingMoved = false;
+
+                    for (let a of this.agents) {
+
+                        if (a.control(this, event))
+                            somethingMoved = true;
+                    }
+
+                    if (somethingMoved)
+                        this.checkMade = false;
+                }
+                while (somethingMoved);
+            }
+            else {
+
+                this.waitTimer -= event.step;
+            }
         }
 
         for (let a of this.agents) {
@@ -370,34 +442,6 @@ export class Stage {
     }
 
 
-    private spawnParticles(x : number, y : number, 
-        minSpeed : number, maxSpeed : number,
-        count : number, palette : Array<number>) {
-
-        const LIFE_TIME = 30;
-
-        let pos = new Vector2(x, y);
-        let speed : Vector2;
-        let angle : number;
-        let color : number;
-
-        for (let i = 0; i < count; ++ i) {
-
-            angle = Math.random() * Math.PI * 2;
-
-            speed = Vector2.scalarMultiply(
-                new Vector2(Math.cos(angle), Math.sin(angle)),
-                Math.random() * (maxSpeed - minSpeed) + minSpeed);
-
-            color = palette[(Math.random() * palette.length) | 0];
-
-            nextObject(this.particles, Particle)
-                .spawn(pos, speed, LIFE_TIME, color,
-                    (1 + Math.random() * 2) | 0);
-        }
-    }
-
-
     public isSolid(x : number, y : number, canTouchStar = false) : boolean {
 
         let tid = this.staticLayer[y * this.width + x];
@@ -435,4 +479,11 @@ export class Stage {
         return false;
     }
 
+
+    public undo() {
+
+        if (!this.checkMade) return;
+
+        // ...
+    }
 }

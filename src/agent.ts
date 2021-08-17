@@ -10,7 +10,8 @@ import { Vector2 } from "./vector.js";
 export class Agent extends ExistingObject {
 
 
-    private id : number;
+    public readonly id : number;
+
     private frameTimer : number;
     private frame : number;
     private flip : Flip;
@@ -248,6 +249,7 @@ export class Agent extends ExistingObject {
 
 
     public isMoving = () : boolean => this.exist && this.moving;
+    public getRenderPos = () : Vector2 => this.renderPos.clone();
 
 
     public markForDestruction(x : number, y : number) {
@@ -259,7 +261,7 @@ export class Agent extends ExistingObject {
     }
 
     
-    public kill(stage : Stage) {
+    public kill(stage : Stage) : boolean {
 
         if (this.exist && this.destroy) {
 
@@ -267,6 +269,10 @@ export class Agent extends ExistingObject {
             this.destroy = false;
 
             stage.markObjectTile(this.pos.x, this.pos.y, 0);
+
+            return true;
         }
+        return false;
     }
+    
 }
