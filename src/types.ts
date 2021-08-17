@@ -23,7 +23,7 @@ export class ExistingObject {
     protected exist : boolean;
 
 
-    constructor() { this.exist = false; }
+    constructor(exist = false) { this.exist = exist; }
 
 
     public doesExist = () : boolean => this.exist;

@@ -1,3 +1,4 @@
+import { Agent } from "./agent.js";
 import { Canvas } from "./canvas.js";
 import { CoreEvent } from "./core.js";
 import { DataGenerator } from "./datagen.js";
@@ -8,7 +9,7 @@ import { nextObject } from "./types.js";
 import { Vector2 } from "./vector.js";
 
 
-const STATIC_TILES = [1];
+const STATIC_TILES = [1, 7];
 
 
 export const enum ItemEffect {
@@ -23,6 +24,7 @@ export class Stage {
 
     private staticLayer : Array<number>;
 
+    private agents : Array<Agent>;
     private particles : Array<Particle>;
     
     private sparkTimes : Array<number>;
@@ -41,6 +43,7 @@ export class Stage {
         this.staticLayer = Array.from(MAP_DATA)
             .map(i => (STATIC_TILES.includes(i) ? i : 0));
 
+        this.agents = new Array<Agent> ();
         this.sparkTimes = (new Array<number> (10))
             .fill(0)
             .map((v, i) => (Math.PI*2 / 10) * i);
@@ -55,6 +58,8 @@ export class Stage {
 
     private parseObjects() {
 
+        const MOVE_TIME = 16;
+
         let tid : number;
         let i : number;
         for (let y = 0; y < this.height; ++ y) {
@@ -65,7 +70,18 @@ export class Stage {
                 tid = MAP_DATA[i];
                 if (tid == 0) continue;
 
+                -- tid;
+
                 switch (tid) {
+
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                    
+                    this.agents.push(new Agent(x, y, tid-1, MOVE_TIME));
+                    break;
 
                 default:
                     break;
@@ -91,12 +107,17 @@ export class Stage {
 
             p.update(event);
         }
+
+        for (let a of this.agents) {
+
+            a.update(event);
+        }
     }
 
 
     private drawStaticLayer(canvas : Canvas,) {
 
-        const SRCX = [0];
+        const SRCX = [0, , , , , , 10];
 
         let bmp = canvas.data.getBitmap("art1");
 
@@ -174,6 +195,11 @@ export class Stage {
 
         this.drawBackground(canvas);
         this.drawStaticLayer(canvas);
+        
+        for (let a of this.agents) {
+
+            a.draw(canvas);
+        }
 
         for (let p of this.particles) {
 

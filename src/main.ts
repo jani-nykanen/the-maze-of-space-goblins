@@ -12,8 +12,8 @@ const ROCK2 = [0, -1, 0b101000, 0b010100];
 
 const STAR = [0, 0, 0b101011, 0b111111]; 
 
-const ALIEN_GREEN_1 = [0, -1, 0b111110, 0b101000];
-const ALIEN_GREEN_2 = [0, -1, 0b010100, 0b101000];
+const ALIEN_GREEN_1 = [0, -1, 0b101100, 0b011000];
+const ALIEN_GREEN_2 = [0, -1, 0b000100, 0b011000];
 
 const ALIEN_BLUE_1 = [0, -1, 0b101111, 0b011011];
 const ALIEN_BLUE_2 = [0, -1, 0b000110, 0b011011];
@@ -23,19 +23,23 @@ const ALIEN_YELLOW_2 = [0, -1, 0b100100, 0b111000]
 
 const FACE = [0, -1, 0b101010, 0b111111];
 
+const PSTAR_1 = [0, -1, 0b111110, 0b111100];
+const PSTAR_2 = [0, -1, 0b111000 ,0b111100]
+
+
 
 const PALETTE_1 = [
 
     // Line 1
     BRICK, BRICK, UFO1, UFO1, UFO1, UFO1, UFO1, UFO1,
     ROCK1, ROCK1, STAR, null, ALIEN_GREEN_1, ALIEN_GREEN_2, ALIEN_GREEN_1, ALIEN_GREEN_2,
-    ALIEN_GREEN_1, ALIEN_GREEN_2,  FACE, FACE, null, null, null, null,
+    ALIEN_GREEN_1, ALIEN_GREEN_2,  FACE, FACE, PSTAR_1, PSTAR_2, null, null,
     null,  null,  null, null, null, null, null, null,
 
     // Line 2
     BRICK, BRICK, UFO2, UFO2, UFO2, UFO2, UFO2, UFO2,
     ROCK2, ROCK2, STAR, null, ALIEN_GREEN_2, ALIEN_GREEN_2, ALIEN_GREEN_2, ALIEN_GREEN_2, 
-    ALIEN_GREEN_2, ALIEN_GREEN_2,  FACE, null, null, null, null, null,
+    ALIEN_GREEN_2, ALIEN_GREEN_2,  FACE, null, PSTAR_2, PSTAR_2, null, null,
     null,  null,  null, null, null, null, null, null,
 ];
 

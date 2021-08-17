@@ -27,6 +27,7 @@ dist:
 	cp art.png temp/art.png
 	(cd temp; zip -r ../dist.zip .)
 	advzip -z dist.zip
+	rm -rf temp
 
 
 linecount:
