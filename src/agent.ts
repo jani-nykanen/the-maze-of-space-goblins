@@ -26,6 +26,8 @@ export class Agent extends ExistingObject {
     private dust : Array<Dust>;
     private dustTimer : number;
 
+    private destroy : boolean;
+
 
     constructor(x : number, y : number, id : number, moveTime : number) {
 
@@ -57,6 +59,8 @@ export class Agent extends ExistingObject {
             this.dust = new Array<Dust> ();
             this.dustTimer = 0;
         }
+
+        this.destroy = false;
     } 
 
 
@@ -243,5 +247,26 @@ export class Agent extends ExistingObject {
     }
 
 
-    public isMoving = () : boolean => this.moving;
+    public isMoving = () : boolean => this.exist && this.moving;
+
+
+    public markForDestruction(x : number, y : number) {
+
+        if (this.id < 2 || this.pos.x != x || this.pos.y != y)
+            return;
+
+        this.destroy = true;
+    }
+
+    
+    public kill(stage : Stage) {
+
+        if (this.exist && this.destroy) {
+
+            this.exist = false;
+            this.destroy = false;
+
+            stage.markObjectTile(this.pos.x, this.pos.y, 0);
+        }
+    }
 }

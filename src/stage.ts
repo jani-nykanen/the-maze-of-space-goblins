@@ -11,6 +11,9 @@ import { Vector2 } from "./vector.js";
 
 const STATIC_TILES = [1, 7];
 
+const FIRST_MONSTER = 3;
+const LAST_MONSTER = 5;
+
 
 export const enum ItemEffect {
 
@@ -30,6 +33,8 @@ export class Stage {
     
     private sparkTimes : Array<number>;
     private starPos : number;
+
+    private checkMade : boolean; // Heh, check mate
 
 
     public readonly width : number;
@@ -56,6 +61,8 @@ export class Stage {
         this.particles = new Array<Particle> ();
 
         this.starPos = 0;
+
+        this.checkMade = true;
     }
 
 
@@ -94,7 +101,7 @@ export class Stage {
     }
 
 
-    public update(event : CoreEvent) {
+    private updateBackground(event : CoreEvent) {
 
         const SPARK_SPEED = 0.05;
         const STAR_MOVE_SPEED = 0.5;
@@ -110,6 +117,121 @@ export class Stage {
 
             p.update(event);
         }
+    }
+
+
+    private computeNeighbors(x : number, y : number, v : number) : number {
+
+        let dx : number;
+        let dy : number;
+
+        let count = 0;
+
+        for (let j = -1; j <= 1; ++ j) {
+
+            for (let i = -1; i <= 1; ++ i) {
+
+                if (Math.abs(i) == Math.abs(j)) continue;
+
+                dx = negMod(x + i, this.width);
+                dy = negMod(y + j, this.height);
+
+                if (this.objectLayer[dy * this.width + dx] == v) {
+
+                    ++ count;
+                }
+            }
+        }
+        return count;
+    }
+
+    
+    private checkIfDestroyable(x : number, y : number, v : number, arr : Array<number>) : boolean {
+
+        // TODO: Repeating code, merge with above somehow?
+
+        let dx : number;
+        let dy : number;
+
+        let k : number;
+
+        for (let j = -1; j <= 1; ++ j) {
+
+            for (let i = -1; i <= 1; ++ i) {
+
+                if (Math.abs(i) == Math.abs(j)) continue;
+
+                dx = negMod(x + i, this.width);
+                dy = negMod(y + j, this.height);
+
+                k = dy * this.width + dx;
+                if (this.objectLayer[k] == v && arr[k] >= 2) {
+
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+
+    private checkConnections() {
+
+        let neighborCount = (new Array<number> (this.width*this.height)).fill(0);
+  
+        let i : number;
+        // For round: compute neighbors
+        for (let y = 0; y < this.height; ++ y) {
+
+            for (let x = 0; x < this.width; ++ x) {
+
+                i = y * this.width + x;
+                if (this.objectLayer[i] < FIRST_MONSTER ||
+                    this.objectLayer[i] > LAST_MONSTER)
+                    continue;
+
+                neighborCount[i] = this.computeNeighbors(x, y, this.objectLayer[i]);
+            }
+        }
+
+        // Second round: mark to be destroyed
+        for (let y = 0; y < this.height; ++ y) {
+
+            for (let x = 0; x < this.width; ++ x) {
+
+                i = y * this.width + x;
+                if (this.objectLayer[i] < FIRST_MONSTER ||
+                    this.objectLayer[i] > LAST_MONSTER)
+                    continue;
+
+                if (this.checkIfDestroyable(x, y, 
+                    this.objectLayer[i], neighborCount)) {
+
+                    // Go through all agents and find one to be destroyed
+                    // (a bit slow, I know)
+                    for (let a of this.agents) {
+
+                        a.markForDestruction(x, y);
+                    }
+                }
+            }
+        }
+    }
+
+
+    private destroy(event : CoreEvent) {
+
+        for (let a of this.agents) {
+
+            a.kill(this);
+        }
+    }
+
+
+    public update(event : CoreEvent) {
+
+        this.updateBackground(event);
 
         let anyMoving = false;
         for (let a of this.agents) {
@@ -124,6 +246,14 @@ export class Stage {
         let somethingMoved = false;
         if (!anyMoving) {
             
+            if (!this.checkMade) {
+
+                this.checkConnections();
+                this.destroy(event);
+
+                this.checkMade = true;
+            }
+
             do {
 
                 somethingMoved = false;
@@ -133,6 +263,9 @@ export class Stage {
                     if (a.control(this, event))
                         somethingMoved = true;
                 }
+
+                if (somethingMoved)
+                    this.checkMade = false;
             }
             while (somethingMoved);
         }
