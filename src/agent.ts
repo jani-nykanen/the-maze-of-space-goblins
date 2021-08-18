@@ -28,6 +28,7 @@ export class Agent extends ExistingObject {
     private dustTimer : number;
 
     private destroy : boolean;
+    private reset : boolean;
 
 
     constructor(x : number, y : number, id : number, moveTime : number) {
@@ -62,6 +63,7 @@ export class Agent extends ExistingObject {
         }
 
         this.destroy = false;
+        this.reset = false;
     } 
 
 
@@ -148,6 +150,8 @@ export class Agent extends ExistingObject {
 
     public update(stage : Stage, event : CoreEvent) {
 
+        this.reset = false;
+
         if (!this.exist) return;
 
         this.move(stage, event);
@@ -160,7 +164,7 @@ export class Agent extends ExistingObject {
     }
 
 
-    public control(stage : Stage, event : CoreEvent) : boolean {
+    public control(stage : Stage, isFirst : boolean, event : CoreEvent) : boolean {
 
         if (this.moving) return false;
 
@@ -192,6 +196,11 @@ export class Agent extends ExistingObject {
 
             this.moving = true;
             this.moveTimer = 0;
+
+            if (isFirst) {
+
+                stage.storeMove();
+            }
 
             this.target = Vector2.add(this.pos, new Vector2(dx, dy));
 
@@ -275,4 +284,22 @@ export class Agent extends ExistingObject {
         return false;
     }
     
+
+    public setPos(x : number, y : number, forceAlive = false) {
+        
+        this.pos = new Vector2(x, y);
+        this.target = this.pos.clone();
+        this.renderPos = Vector2.scalarMultiply(this.pos, 16);
+
+        this.moveTimer = 0;
+        this.moving = false;
+
+        this.exist = this.exist || forceAlive;
+        this.destroy = false;
+
+        this.reset = true;
+    }
+
+
+    public hadBeenReset = () : boolean => this.reset;
 }

@@ -61,6 +61,7 @@ export class Stage {
             .map(i => (i >= 2 && i <= 6 ? (i-1) : 0));
 
         this.objectLayerStack = new Array<Array<number>> ();
+        this.objectLayerStack.push(Array.from(this.objectLayer));
 
         this.agents = new Array<Agent> ();
         this.sparkTimes = (new Array<number> (10))
@@ -280,16 +281,6 @@ export class Stage {
     }
 
 
-    private storeMove() {
-
-        const MAX_LENGTH = 64;
-
-        this.objectLayerStack.push(Array.from(this.objectLayer));
-        if (this.objectLayerStack.length > MAX_LENGTH)
-            this.objectLayerStack.shift();
-    }
-
-
     public update(event : CoreEvent) {
 
         this.updateBackground(event);
@@ -305,11 +296,10 @@ export class Stage {
         }
         
         let somethingMoved = false;
+        let first = true;
         if (!anyMoving) {
             
             if (!this.checkMade) {
-
-                this.storeMove();
 
                 this.checkMade = true;
                 if (this.checkConnections()) {
@@ -318,7 +308,7 @@ export class Stage {
                     this.waitTimer = MOVE_TIME;
                 }
             }
-
+            
             if (this.waitTimer <= 0) {
 
                 do {
@@ -327,8 +317,11 @@ export class Stage {
 
                     for (let a of this.agents) {
 
-                        if (a.control(this, event))
+                        if (a.control(this, first, event)) {
+
                             somethingMoved = true;
+                            first = false;
+                        }
                     }
 
                     if (somethingMoved)
@@ -480,10 +473,62 @@ export class Stage {
     }
 
 
+    private findNextAgent(id : number) : Agent {
+
+        // First round: only those who exist
+        for (let a of this.agents) {
+
+            if (!a.hadBeenReset() && a.id == id && a.doesExist()) {
+
+                return a;
+            }
+        }
+
+        // Second round: those who do not exist
+        for (let a of this.agents) {
+
+            if (!a.hadBeenReset() && a.id == id) {
+
+                return a;
+            }
+        }
+
+        return null;
+    }
+
+
     public undo() {
 
-        if (!this.checkMade) return;
+        if (!this.checkMade || this.waitTimer > 0 ||
+            this.objectLayerStack.length == 0) return;
 
-        // ...
+        this.objectLayer = Array.from(this.objectLayerStack.pop());
+
+        let a : Agent;
+
+        let v : number;
+        for (let y = 0; y < this.height; ++ y) {
+
+            for (let x = 0; x < this.width; ++ x) {
+
+                v = this.objectLayer[y*this.width+x];
+                if (v == 0) continue;
+
+                a = this.findNextAgent(v-1);
+                if (a == null) continue;
+
+                a.setPos(x, y, true);
+            }
+        }
+    }
+
+
+    public storeMove() {
+
+        const MAX_LENGTH = 64;
+
+        this.objectLayerStack.push(Array.from(this.objectLayer));
+        if (this.objectLayerStack.length > MAX_LENGTH)
+            this.objectLayerStack.shift();
     }
 }
