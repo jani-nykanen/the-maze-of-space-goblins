@@ -19,7 +19,8 @@ const MOVE_TIME = 12;
 const PARTICLE_PALETTES = [
     [0b000100, 0b101100, 0b011000],
     [0b000110, 0b101111, 0b011011],
-    [0b100100, 0b111110, 0b111000]
+    [0b100100, 0b111110, 0b111000],
+    [0b111000 ,0b111100, 0b111110]
 ];
 
 
@@ -34,6 +35,7 @@ export class Stage {
 
 
     private staticLayer : Array<number>;
+    private staticLayerStack : Array<Array<number>>;
     private objectLayer : Array<number>;
     private objectLayerStack : Array<Array<number>>;
 
@@ -55,27 +57,52 @@ export class Stage {
         this.width = MAP_WIDTH;
         this.height = MAP_HEIGHT;
 
-        this.staticLayer = Array.from(MAP_DATA)
-            .map(i => (STATIC_TILES.includes(i) ? i : 0));
-        this.objectLayer = Array.from(MAP_DATA)
-            .map(i => (i >= 2 && i <= 6 ? (i-1) : 0));
+        this.particles = new Array<Particle> ();
 
-        this.objectLayerStack = new Array<Array<number>> ();
-        this.objectLayerStack.push(Array.from(this.objectLayer));
-
+        // Unnecessary, but takes Closure warnings away
+        this.staticLayer = new Array<number> ();
+        this.objectLayer = new Array<number> ();
         this.agents = new Array<Agent> ();
+
+        this.staticLayerStack = new Array<Array<number>> ();
+        this.objectLayerStack = new Array<Array<number>> ();
+
+        this.checkMade = true;
+        this.waitTimer = 0;
+
+        this.reset();
+
         this.sparkTimes = (new Array<number> (10))
             .fill(0)
             .map((v, i) => (Math.PI*2 / 10) * i);
 
-        this.parseObjects();
-
-        this.particles = new Array<Particle> ();
-
         this.starPos = 0;
+    }
+
+
+    public reset() {
+
+        this.staticLayer = Array.from(MAP_DATA)
+            .map(i => (STATIC_TILES.includes(i) ? i : 0));
+        this.staticLayerStack.length = 0;
+        this.staticLayerStack.push(Array.from(this.staticLayer));
+
+        this.objectLayer = Array.from(MAP_DATA)
+            .map(i => (i >= 2 && i <= 6 ? (i-1) : 0));
+        this.objectLayerStack.length = 0;
+        this.objectLayerStack.push(Array.from(this.objectLayer));
+
+        this.agents = new Array<Agent> ();
+
+        this.parseObjects();
 
         this.checkMade = true;
         this.waitTimer = 0;
+
+        for (let p of this.particles) {
+
+            p.kill();
+        }
     }
 
 
@@ -198,10 +225,20 @@ export class Stage {
             for (let x = 0; x < this.width; ++ x) {
 
                 i = y * this.width + x;
-                if (this.objectLayer[i] < FIRST_MONSTER ||
-                    this.objectLayer[i] > LAST_MONSTER)
-                    continue;
 
+                if (this.objectLayer[i] < FIRST_MONSTER ||
+                    this.objectLayer[i] > LAST_MONSTER) {
+
+                    if (this.objectLayer[i] == 1 &&
+                        this.staticLayer[i] == 7) {
+
+                        this.staticLayer[i] = 0;
+                        this.spawnParticles(x*16 + 8, y*16 + 8,
+                            0.5, 1.0, 16, PARTICLE_PALETTES[3]);
+                    }
+
+                    continue;
+                }
                 neighborCount[i] = this.computeNeighbors(x, y, this.objectLayer[i]);
             }
         }
@@ -425,7 +462,7 @@ export class Stage {
         
         for (let a of this.agents) {
 
-            a.draw(canvas);
+            a.draw(canvas, this);
         }
 
         for (let p of this.particles) {
@@ -436,6 +473,9 @@ export class Stage {
 
 
     public isSolid(x : number, y : number, canTouchStar = false) : boolean {
+
+        x = negMod(x, this.width);
+        y = negMod(y, this.height);
 
         let tid = this.staticLayer[y * this.width + x];
         if (tid == 1 || (!canTouchStar && tid == 7))
@@ -454,11 +494,17 @@ export class Stage {
     public isPlayerInDirection(x : number, y : number, 
         dirx : number, diry : number) : boolean {
 
+        let sx = x;
+        let sy = y;
+
         let i : number;
         do {
 
             x += dirx;
             y += diry;
+
+            x = negMod(x, this.width);
+            y = negMod(y, this.height);
 
             i = y * this.width + x;
 
@@ -467,7 +513,7 @@ export class Stage {
         }
         while(this.staticLayer[i] == 0 &&
             this.objectLayer[i] != 0 &&
-            x > 0 && y > 0 && x < this.width-1 && y < this.height-1);
+            (x != sx || y != sy));
 
         return false;
     }
@@ -503,6 +549,7 @@ export class Stage {
             this.objectLayerStack.length == 0) return;
 
         this.objectLayer = Array.from(this.objectLayerStack.pop());
+        this.staticLayer = Array.from(this.staticLayerStack.pop());
 
         let a : Agent;
 
@@ -530,5 +577,9 @@ export class Stage {
         this.objectLayerStack.push(Array.from(this.objectLayer));
         if (this.objectLayerStack.length > MAX_LENGTH)
             this.objectLayerStack.shift();
+
+        this.staticLayerStack.push(Array.from(this.staticLayer));
+        if (this.staticLayerStack.length > MAX_LENGTH)
+            this.staticLayerStack.shift();
     }
 }

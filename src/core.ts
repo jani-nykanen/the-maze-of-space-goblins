@@ -1,6 +1,7 @@
 import { Canvas } from "./canvas.js";
 import { DataGenerator } from "./datagen.js";
 import { Keyboard } from "./keyboard.js";
+import { TransitionEffectManager } from "./transition.js";
 
 
 export class CoreEvent {
@@ -9,16 +10,20 @@ export class CoreEvent {
     public readonly step : number;
     public readonly keyboard : Keyboard;
     public readonly data : DataGenerator;
+    public readonly transition : TransitionEffectManager;
 
     private readonly core : Core;
 
 
-    constructor(step : number, core : Core, keyboard : Keyboard, data : DataGenerator) {
+    constructor(step : number, core : Core, 
+        keyboard : Keyboard, data : DataGenerator,
+        tr : TransitionEffectManager) {
 
         this.core = core;
         this.step = step;
         this.keyboard = keyboard;
         this.data = data;
+        this.transition = tr;
     }
 
 
@@ -43,6 +48,7 @@ export class Core {
     private keyboard : Keyboard;
     private event : CoreEvent;
     private data : DataGenerator;
+    private transition : TransitionEffectManager;
 
     private activeScene : Scene;
     private activeSceneType : Function;
@@ -58,8 +64,10 @@ export class Core {
         this.data = new DataGenerator();
         this.canvas = new Canvas(canvasWidth, canvasHeight, this.data);
         this.keyboard = new Keyboard();
+        this.transition = new  TransitionEffectManager();
 
-        this.event = new CoreEvent(frameSkip+1, this, this.keyboard, this.data);
+        this.event = new CoreEvent(frameSkip+1, this, 
+            this.keyboard, this.data, this.transition);
 
         this.timeSum = 0.0;
         this.oldTime = 0.0;
@@ -96,6 +104,7 @@ export class Core {
             }
 
             this.keyboard.update();
+            this.transition.update(this.event);
 
             this.timeSum -= FRAME_WAIT;
         }
@@ -103,6 +112,7 @@ export class Core {
         if (this.initialized) {
 
             this.activeScene.redraw(this.canvas);
+            this.transition.draw(this.canvas);
         }
         else {
 

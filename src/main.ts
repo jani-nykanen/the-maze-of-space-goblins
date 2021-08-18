@@ -84,6 +84,7 @@ window.onload = () => (new Core(160, 144))
     .addAction("fire", "Space")
     .addAction("back", "Backspace")
     .addAction("start", "Enter")
+    .addAction("restart", "KeyR")
     .run(GameScene, event => {
 
         event.data.generateBitmapFont("font1", "Arial", 10, 256, 256);

@@ -3,6 +3,7 @@ import { CoreEvent, Scene } from "./core.js";
 import { DataGenerator } from "./datagen.js";
 import { State } from "./keyboard.js";
 import { Stage } from "./stage.js";
+import { TransitionEffectType } from "./transition.js";
 
 
 
@@ -17,14 +18,28 @@ export class GameScene implements Scene {
         this.stage = new Stage();
     }
 
+    
+    private reset(event : CoreEvent) {
+
+        event.transition.activate(true, 
+            TransitionEffectType.BoxVertical, 1.0/20.0,
+            () => this.stage.reset());
+    }
+
 
     public update(event : CoreEvent) {
       
+        if (event.transition.isActive()) return;
+
         this.stage.update(event);
 
         if (event.keyboard.getActionState("back") == State.Pressed) {
 
             this.stage.undo();
+        }
+        else if (event.keyboard.getActionState("restart") == State.Pressed) {
+
+            this.reset(event);
         }
     }
 

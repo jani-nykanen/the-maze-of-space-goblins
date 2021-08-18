@@ -264,4 +264,59 @@ export class Canvas {
             this.ctx.fillRect((centerx - w/2) | 0, y | 0, w | 0, 1);
         }
     }
+
+
+    public fillCircleOutside(r : number, cx : number, cy : number) {
+
+        let c = this.ctx;
+
+        if (r <= 0) {
+
+            c.fillRect(0, 0, this.width, this.height);
+            return;
+        }
+        else if (r*r >= Math.hypot(this.width, this.height)) {
+
+            return;
+        }
+
+        if (cx == null)
+            cx = this.width / 2;
+        if (cy == null)
+            cy = this.height / 2;
+        
+        let start = Math.max(0, cy - r) | 0;
+        let end = Math.min(this.height, cy + r) | 0;
+
+        // Areas below and on the top of the circle area
+        if (start > 0)
+            c.fillRect(0, 0, this.width, start);
+        if (end < this.height)
+            c.fillRect(0, end, this.width, this.height - end);
+
+        let dy : number;
+        let px1 : number;
+        let px2 : number;
+        
+        for (let y = start; y < end; ++ y) {
+
+            dy = y - cy;
+
+            if (Math.abs(dy) >= r) {
+
+                c.fillRect(0, y | 0, this.width | 0, 1);
+                continue;
+            }
+
+            px1 = Math.round(cx - Math.sqrt(r*r - dy*dy));
+            px2 = Math.round(cx + Math.sqrt(r*r - dy*dy));
+
+            // Left side
+            if (px1 > 0)
+                c.fillRect(0, y | 0, px1 | 0, 1);
+            // Right side
+            if (px2 < this.width)
+                c.fillRect(px2 | 0, y | 0, (this.width-px1) | 0, 1);
+        }
+    }
 }

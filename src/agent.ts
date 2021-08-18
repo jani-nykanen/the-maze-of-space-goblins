@@ -2,6 +2,7 @@ import { Canvas, Flip } from "./canvas.js";
 import { CoreEvent } from "./core.js";
 import { Dust } from "./dust.js";
 import { State } from "./keyboard.js";
+import { negMod } from "./math.js";
 import { Stage } from "./stage.js";
 import { ExistingObject, nextObject } from "./types.js";
 import { Vector2 } from "./vector.js";
@@ -74,6 +75,9 @@ export class Agent extends ExistingObject {
         if ((this.moveTimer += event.step) >= this.moveTime) {
 
             this.pos = this.target.clone();
+            this.pos.x = negMod(this.pos.x, stage.width);
+            this.pos.y = negMod(this.pos.y, stage.height);
+
             this.renderPos = Vector2.scalarMultiply(this.pos, 16);
 
             stage.markObjectTile(this.pos.x, this.pos.y, this.id+1);
@@ -213,7 +217,7 @@ export class Agent extends ExistingObject {
     }
 
 
-    public draw(canvas : Canvas) {
+    private drawBase(canvas : Canvas, tx = 0, ty = 0) {
 
         const FACE_SRCX = [0, 8, 0];
         const FACE_SRCY = [0, 0, 8];
@@ -236,8 +240,8 @@ export class Agent extends ExistingObject {
 
         let bmp = canvas.data.getBitmap("art" + String(palette));
 
-        let px = Math.round(this.renderPos.x);
-        let py = Math.round(this.renderPos.y);
+        let px = Math.round(this.renderPos.x) + tx;
+        let py = Math.round(this.renderPos.y) + ty;
 
         let frame = this.frame == 3 ? 1 : this.frame;
         frame += START_FRAME[this.id];
@@ -254,6 +258,22 @@ export class Agent extends ExistingObject {
                 FACE_SRCY[this.id-2],
                 8, 8, px + 4, py + 4);
         }
+    }
+
+
+    public draw(canvas : Canvas, stage : Stage) {
+
+        this.drawBase(canvas);
+        if (this.target.x < 0)
+            this.drawBase(canvas, stage.width*16);
+        else if (this.target.x >= stage.width)
+            this.drawBase(canvas, -stage.width*16);
+
+        if (this.target.y < 0)
+            this.drawBase(canvas, 0, stage.height*16);
+        else if (this.target.y >= stage.height)
+            this.drawBase(canvas, 0, -stage.height*16);
+        
     }
 
 
