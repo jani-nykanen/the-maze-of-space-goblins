@@ -39,7 +39,7 @@ const PALETTE_1 = [
     // Line 2
     BRICK, BRICK, UFO2, UFO2, UFO2, UFO2, UFO2, UFO2,
     ROCK2, ROCK2, STAR, null, ALIEN_GREEN_2, ALIEN_GREEN_2, ALIEN_GREEN_2, ALIEN_GREEN_2, 
-    ALIEN_GREEN_2, ALIEN_GREEN_2,  FACE, null, PSTAR_2, PSTAR_2, null, null,
+    ALIEN_GREEN_2, ALIEN_GREEN_2,  FACE, FACE, PSTAR_2, PSTAR_2, null, null,
     null,  null,  null, null, null, null, null, null,
 ];
 

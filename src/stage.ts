@@ -8,10 +8,10 @@ import { nextObject } from "./types.js";
 import { Vector2 } from "./vector.js";
 
 
-const STATIC_TILES = [1, 7];
+const STATIC_TILES = [1, 8];
 
 const FIRST_MONSTER = 3;
-const LAST_MONSTER = 5;
+const LAST_MONSTER = 6;
 
 const MOVE_TIME = 12;
 
@@ -20,6 +20,7 @@ const PARTICLE_PALETTES = [
     [0b000100, 0b101100, 0b011000],
     [0b000110, 0b101111, 0b011011],
     [0b100100, 0b111110, 0b111000],
+    [0b101100, 0b011011, 0b111000],
     [0b111000 ,0b111100, 0b111110]
 ];
 
@@ -88,7 +89,7 @@ export class Stage {
         this.staticLayerStack.push(Array.from(this.staticLayer));
 
         this.objectLayer = Array.from(MAP_DATA)
-            .map(i => (i >= 2 && i <= 6 ? (i-1) : 0));
+            .map(i => (i >= 2 && i <= LAST_MONSTER+1 ? (i-1) : 0));
         this.objectLayerStack.length = 0;
         this.objectLayerStack.push(Array.from(this.objectLayer));
 
@@ -127,6 +128,7 @@ export class Stage {
                 case 3:
                 case 4:
                 case 5:
+                case 6:
                     
                     this.agents.push(new Agent(x, y, tid-1, MOVE_TIME));
                     break;
@@ -164,6 +166,7 @@ export class Stage {
         let dy : number;
 
         let count = 0;
+        let k : number;
 
         for (let j = -1; j <= 1; ++ j) {
 
@@ -174,7 +177,9 @@ export class Stage {
                 dx = negMod(x + i, this.width);
                 dy = negMod(y + j, this.height);
 
-                if (this.objectLayer[dy * this.width + dx] == v) {
+                k  = dy * this.width + dx;
+                if (this.objectLayer[k] == v ||
+                    this.objectLayer[k] == LAST_MONSTER) {
 
                     ++ count;
                 }
@@ -203,7 +208,10 @@ export class Stage {
                 dy = negMod(y + j, this.height);
 
                 k = dy * this.width + dx;
-                if (this.objectLayer[k] == v && arr[k] >= 2) {
+                if (((this.objectLayer[k] == v || 
+                    this.objectLayer[k] == LAST_MONSTER || 
+                    v == LAST_MONSTER)
+                    && arr[k] >= 2)) {
 
                     return true;
                 }
@@ -219,7 +227,7 @@ export class Stage {
         let neighborCount = (new Array<number> (this.width*this.height)).fill(0);
   
         let i : number;
-        // For round: compute neighbors
+        // First round: compute neighbors
         for (let y = 0; y < this.height; ++ y) {
 
             for (let x = 0; x < this.width; ++ x) {
@@ -229,14 +237,14 @@ export class Stage {
                 if (this.objectLayer[i] < FIRST_MONSTER ||
                     this.objectLayer[i] > LAST_MONSTER) {
 
+                    // Star
                     if (this.objectLayer[i] == 1 &&
-                        this.staticLayer[i] == 7) {
+                        this.staticLayer[i] == 8) {
 
                         this.staticLayer[i] = 0;
                         this.spawnParticles(x*16 + 8, y*16 + 8,
-                            0.5, 1.0, 16, PARTICLE_PALETTES[3]);
+                            0.5, 1.0, 16, PARTICLE_PALETTES[4]);
                     }
-
                     continue;
                 }
                 neighborCount[i] = this.computeNeighbors(x, y, this.objectLayer[i]);
@@ -381,7 +389,7 @@ export class Stage {
 
     private drawStaticLayer(canvas : Canvas,) {
 
-        const SRCX = [0, , , , , , 10];
+        const SRCX = [0, , , , , , , 10];
 
         let bmp = canvas.data.getBitmap("art1");
 
@@ -478,7 +486,7 @@ export class Stage {
         y = negMod(y, this.height);
 
         let tid = this.staticLayer[y * this.width + x];
-        if (tid == 1 || (!canTouchStar && tid == 7))
+        if (tid == 1 || (!canTouchStar && tid == 8))
             return true;
 
         return this.objectLayer[y * this.width + x] > 0; 

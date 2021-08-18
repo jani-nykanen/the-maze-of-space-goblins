@@ -2,9 +2,9 @@ import { Canvas, Flip } from "./canvas.js";
 import { CoreEvent } from "./core.js";
 import { Dust } from "./dust.js";
 import { State } from "./keyboard.js";
-import { negMod } from "./math.js";
+import { clamp, negMod } from "./math.js";
 import { Stage } from "./stage.js";
-import { ExistingObject, nextObject } from "./types.js";
+import { Bitmap, ExistingObject, nextObject } from "./types.js";
 import { Vector2 } from "./vector.js";
 
 
@@ -30,6 +30,8 @@ export class Agent extends ExistingObject {
 
     private destroy : boolean;
     private reset : boolean;
+
+    private rainbowTimer : number;
 
 
     constructor(x : number, y : number, id : number, moveTime : number) {
@@ -65,6 +67,8 @@ export class Agent extends ExistingObject {
 
         this.destroy = false;
         this.reset = false;
+
+        this.rainbowTimer = 0;
     } 
 
 
@@ -96,6 +100,7 @@ export class Agent extends ExistingObject {
     private animate(event : CoreEvent) {
 
         const FRAME_TIME = 8;
+        const RAINBOW_SPEED = 1.0 / 30.0;
 
         if (this.id >= 2) {
 
@@ -103,6 +108,11 @@ export class Agent extends ExistingObject {
 
                 this.frameTimer -= FRAME_TIME;
                 this.frame = (this.frame + 1) % 4;
+            }
+
+            if (this.id == 5) {
+
+                this.rainbowTimer = (this.rainbowTimer + RAINBOW_SPEED*event.step) % 1.0;
             }
         }
         else if (this.id == 0 && this.moving) {
@@ -217,12 +227,35 @@ export class Agent extends ExistingObject {
     }
 
 
+    private drawRainbowAgent(canvas : Canvas, frame : number, 
+        px : number, py : number) {
+        
+        let bmps = new Array<Bitmap> (3);
+        for (let i = 0; i < 3; ++ i) {
+
+            bmps[i] = canvas.data.getBitmap("art" + String(i+1));
+        }
+
+        let p = Math.round((1.0-this.rainbowTimer) * 15);
+        let bmp : Bitmap;
+        let sy : number;
+
+        for (let y = 0; y < 16; ++ y) {
+
+            sy = (p + y) % 15;
+            bmp = bmps[(sy / 5) | 0];
+
+            canvas.drawBitmapRegion(bmp, frame*16, y, 16, 1, px, py + y);
+        }
+    }
+
+
     private drawBase(canvas : Canvas, tx = 0, ty = 0) {
 
-        const FACE_SRCX = [0, 8, 0];
-        const FACE_SRCY = [0, 0, 8];
+        const FACE_SRCX = [0, 8, 0, 8];
+        const FACE_SRCY = [0, 0, 8, 8];
 
-        const START_FRAME = [1, 4, 6, 6, 6];
+        const START_FRAME = [1, 4, 6, 6, 6, 6];
 
         if (!this.exist) return;
 
@@ -234,24 +267,32 @@ export class Agent extends ExistingObject {
             }
         }
 
-        let palette = 1;
-        if (this.id >= 3)
-            palette = this.id - 1;
-
-        let bmp = canvas.data.getBitmap("art" + String(palette));
-
         let px = Math.round(this.renderPos.x) + tx;
         let py = Math.round(this.renderPos.y) + ty;
 
         let frame = this.frame == 3 ? 1 : this.frame;
         frame += START_FRAME[this.id];
 
-        canvas.drawBitmapRegion(bmp, 
-            frame*16, 0, 16, 16,
-            px, py, this.flip);
+        let palette = 1;
+        let bmp : Bitmap;
+
+        if (this.id == 5) {
+
+            this.drawRainbowAgent(canvas, frame, px, py);
+        }
+        else {
+
+            if (this.id >= 3)
+                palette = this.id - 1;
+
+            bmp = canvas.data.getBitmap("art" + String(palette));
+            canvas.drawBitmapRegion(bmp, 
+                frame*16, 0, 16, 16,
+                px, py, this.flip);
+        }
 
         if (this.id >= 2) {
-
+            
             canvas.drawBitmapRegion(
                 canvas.data.getBitmap("art1"),
                 144 + FACE_SRCX[this.id-2],
