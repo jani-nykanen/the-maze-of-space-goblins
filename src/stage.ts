@@ -1,5 +1,5 @@
 import { Agent } from "./agent.js";
-import { Canvas } from "./canvas.js";
+import { Canvas, Flip } from "./canvas.js";
 import { CoreEvent } from "./core.js";
 import { MAP_DATA, MAP_HEIGHT, MAP_WIDTH } from "./mapdata.js";
 import { negMod } from "./math.js";
@@ -8,7 +8,8 @@ import { nextObject } from "./types.js";
 import { Vector2 } from "./vector.js";
 
 
-const STATIC_TILES = [1, 8];
+const STATIC_TILES = [1, 8, 9, 10, 11];
+const SOLID_TILES = [1, 10];
 
 const FIRST_MONSTER = 3;
 const LAST_MONSTER = 6;
@@ -179,7 +180,9 @@ export class Stage {
 
                 k  = dy * this.width + dx;
                 if (this.objectLayer[k] == v ||
-                    this.objectLayer[k] == LAST_MONSTER) {
+                    this.objectLayer[k] == LAST_MONSTER ||
+                    (v == LAST_MONSTER && this.objectLayer[k] >= FIRST_MONSTER &&
+                    this.objectLayer[k] <= LAST_MONSTER)) {
 
                     ++ count;
                 }
@@ -282,6 +285,43 @@ export class Stage {
     }
 
 
+    private toggleWalls(state : boolean) {
+
+        for (let i = 0; i < this.width*this.height; ++ i) {
+
+            if (MAP_DATA[i] == 9) 
+                this.staticLayer[i] = state ? 10 : 9;
+
+            else if (MAP_DATA[i] == 10) 
+                this.staticLayer[i] = state ? 9 : 10;
+        }
+    }
+
+
+    private checkButtons() {
+
+        let toggle = true;
+
+        let i : number;
+        for (let y = 0; y < this.height; ++ y) {
+
+            for (let x = 0; x < this.width; ++ x) {
+
+                i = y * this.width + x;
+
+                if (this.staticLayer[i] == 11 &&
+                    this.objectLayer[i] == 0) {
+
+                    toggle = false;
+                    break;
+                }
+            }
+        }
+
+        this.toggleWalls(toggle);
+    }
+
+
     private spawnParticles(x : number, y : number, 
         minSpeed : number, maxSpeed : number,
         count : number, palette : Array<number>) {
@@ -352,6 +392,7 @@ export class Stage {
                     this.destroy(event);
                     this.waitTimer = MOVE_TIME;
                 }
+                this.checkButtons();
             }
             
             if (this.waitTimer <= 0) {
@@ -404,7 +445,58 @@ export class Stage {
 
                 switch (tid) {
 
-                // ...
+                case 9:
+
+                    canvas.drawBitmapRegion(bmp, 88, 8, 8, 8,
+                        x*16, y*16);
+                    canvas.drawBitmapRegion(bmp, 88, 8, 8, 8,
+                        x*16+8, y*16, Flip.Horizontal);
+                    canvas.drawBitmapRegion(bmp, 88, 8, 8, 8,
+                        x*16, y*16+8, Flip.Vertical);
+                    canvas.drawBitmapRegion(bmp, 88, 8, 8, 8,
+                        x*16+8, y*16+8, Flip.Both);
+
+                    break;
+
+                case 10:
+
+                    canvas.setFillColor(0, 0, 0);
+                    canvas.fillRect(x*16, y*16, 16, 16);
+
+                    canvas.setFillColor(85, 0, 170);
+                    canvas.fillRect(x*16, y*16+1, 15, 15);
+
+                    canvas.setFillColor(255, 170, 255);
+                    canvas.fillRect(x*16, y*16+1, 14, 14);
+
+                    canvas.setFillColor(170, 85, 255);
+                    canvas.fillRect(x*16+1, y*16+2, 13, 13);
+
+                    canvas.drawBitmapRegion(bmp, 88, 0, 8, 8,
+                        x*16+4, y*16+4);
+                        
+                    break;
+
+                case 11:
+
+                    canvas.setFillColor(0, 0, 0);
+                    canvas.fillRect(x*16+1, y*16+1, 14, 14);
+
+                    canvas.setFillColor(85, 85, 85);
+                    canvas.fillRect(x*16+2, y*16+2, 12, 12);
+
+                    canvas.setFillColor(255, 255, 255);
+                    canvas.fillRect(x*16+2, y*16+2, 12, 11);
+
+                    canvas.setFillColor(170, 170, 170);
+                    canvas.fillRect(x*16+3, y*16+3, 11, 10);
+
+                    canvas.drawBitmapRegion(canvas.data.getBitmap("art2"), 176, 0, 8, 8,
+                        x*16+4, y*16+4);
+                    canvas.drawBitmapRegion(bmp, 176, 0, 8, 8,
+                        x*16+4, y*16+3);
+
+                    break;
 
                 default:
                     canvas.drawBitmapRegion(bmp, 
@@ -486,7 +578,7 @@ export class Stage {
         y = negMod(y, this.height);
 
         let tid = this.staticLayer[y * this.width + x];
-        if (tid == 1 || (!canTouchStar && tid == 8))
+        if (SOLID_TILES.includes(tid) || (!canTouchStar && tid == 8))
             return true;
 
         return this.objectLayer[y * this.width + x] > 0; 
