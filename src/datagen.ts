@@ -47,60 +47,6 @@ export class DataGenerator {
     }
 
 
-    private addBlackBorder(data : ImageData, width : number, height : number) {
-
-        let p = Uint8Array.from(data.data);
-
-        let i = 0;
-        for (let y = 1; y < height; ++ y) {
-
-            for (let x = 0; x < width-1; ++ x) {
-
-                i = (y * width + x) * 4;
-
-                if (p[i + 3] == 0 &&
-                    (p[ ( (y-1) * width + x) * 4 + 3] == 255 ||
-                    p[ ( (y-1) * width + (x-1)) *4 + 3] == 255 ||
-                    p[ ( y * width + (x-1)) * 4 + 3] == 255)) {
-
-                    data.data[i] = 0;
-                    data.data[i + 1] = 0;
-                    data.data[i + 2] = 0;
-                    data.data[i + 3] = 255;
-                }
-            }
-        }
-    }
-
-
-    private convertToMonochrome(image : HTMLCanvasElement, 
-        color : [number, number, number],
-        border = false) {
-
-        const ALPHA_LIMIT = 80;
-
-        let ctx = image.getContext("2d");
-        let data = ctx.getImageData(0, 0, image.width, image.height);
-        let p = Uint8Array.from(data.data);
-        let v : number;
-
-        for (let i = 0; i < image.width*image.height*4; i += 4) {
-
-            v = p[i + 3] < ALPHA_LIMIT ? 0 : 255;
-              
-            data.data[i] = color[0];
-            data.data[i + 1] = color[1];
-            data.data[i + 2] = color[2];
-            data.data[i + 3] = v;
-        }
-
-        if (border)
-            this.addBlackBorder(data, image.width, image.height);
-
-        ctx.putImageData(data, 0, 0);
-    }
-
-
     private pickColorIndex(data : Uint8Array, start : number) {
 
         let r = data[start];
@@ -118,7 +64,26 @@ export class DataGenerator {
     }
 
 
-    private convertToRGB222(image : HTMLImageElement, paletteMap : Array<number[]>) : HTMLCanvasElement {
+    private convertToRGB222(image : HTMLCanvasElement, ctx : CanvasRenderingContext2D, alphaLimit = 64) {
+
+        let data = ctx.getImageData(0, 0, image.width, image.height);
+        let pix = Uint8Array.from(data.data);
+
+        for (let i = 0; i < image.width * image.height * 4; i += 4) {
+
+            for (let j = 0; j < 3; ++ j) {
+
+                data.data[i + j] = (pix[i + j] / 85) | 0;
+                data.data[i + j] *= 85;
+            }
+            data.data[i + 3] = pix[i + 3] < alphaLimit ? 0 : 255;
+        }
+    
+        ctx.putImageData(data, 0, 0);
+    }
+
+
+    private applyRGB222Palette(image : HTMLImageElement, paletteMap : Array<number[]>) : HTMLCanvasElement {
 
         const TRANSPARENT = [-1, -1, -1, -1];
 
@@ -200,6 +165,7 @@ export class DataGenerator {
         let ch = (height / 16) | 0;
 
         let i = 0;
+        
         for (let y = 0; y < 16; ++ y) {
 
             for (let x = 0; x < 16; ++ x) {
@@ -209,7 +175,7 @@ export class DataGenerator {
             }
         }
 
-        this.convertToMonochrome(canvas, [255, 255, 255], true);
+        this.convertToRGB222(canvas, ctx, 80);
         this.bitmaps.push(new KeyValuePair<Bitmap> (name, canvas));
     }
 
@@ -218,7 +184,7 @@ export class DataGenerator {
         paletteMap : Array<number[]>) {
 
         this.bitmaps.push(new KeyValuePair<Bitmap> (name, 
-            this.convertToRGB222(image, paletteMap) ));
+            this.applyRGB222Palette(image, paletteMap) ));
     }
 
 
