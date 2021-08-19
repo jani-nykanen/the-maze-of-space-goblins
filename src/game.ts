@@ -25,7 +25,9 @@ export class GameScene implements Scene {
 
     constructor() {
 
-        this.stage = new Stage();
+        const START_INDEX = 10;
+
+        this.stage = new Stage(START_INDEX);
 
         this.pauseMenu = new Menu(
             [
@@ -52,6 +54,15 @@ export class GameScene implements Scene {
             ]
         );
 
+        this.cleared = false;
+        this.clearTimer = 0;
+    }
+
+
+    private nextStage() {
+
+        let index = this.stage.index;
+        this.stage = new Stage(index+1);
 
         this.cleared = false;
         this.clearTimer = 0;
@@ -84,7 +95,7 @@ export class GameScene implements Scene {
             if ((this.clearTimer -= event.step) <= 0) {
 
                 event.transition.activate(true, TransitionEffectType.CirleIn,
-                    1.0/30.0, event => this.reset(), 
+                    1.0/30.0, () => this.nextStage(), 
                     [0, 0, 0])
                     .setCenter(new Vector2(80, 72));
 

@@ -52,16 +52,22 @@ export class Stage {
 
     private stageClear : boolean;
 
+    private data : Array<number>;
+
     public readonly width : number;
     public readonly height : number;
+    public readonly index : number;
 
 
-    constructor() {
+    constructor(index : number) {
 
         this.width = MAP_WIDTH;
         this.height = MAP_HEIGHT;
 
         this.particles = new Array<Particle> ();
+
+        this.index = index;
+        this.data = MAP_DATA[index-1];
 
         // Unnecessary, but takes Closure warnings away
         this.staticLayer = new Array<number> ();
@@ -88,12 +94,12 @@ export class Stage {
 
     public reset() {
 
-        this.staticLayer = Array.from(MAP_DATA)
+        this.staticLayer = Array.from(this.data)
             .map(i => (STATIC_TILES.includes(i) ? i : 0));
         this.staticLayerStack.length = 0;
         this.staticLayerStack.push(Array.from(this.staticLayer));
 
-        this.objectLayer = Array.from(MAP_DATA)
+        this.objectLayer = Array.from(this.data)
             .map(i => (i >= 2 && i <= LAST_MONSTER+1 ? (i-1) : 0));
         this.objectLayerStack.length = 0;
         this.objectLayerStack.push(Array.from(this.objectLayer));
@@ -122,7 +128,7 @@ export class Stage {
             for (let x = 0; x < this.width; ++ x) {
 
                 i = y * this.width + x;
-                tid = MAP_DATA[i];
+                tid = this.data[i];
                 if (tid == 0) continue;
 
                 -- tid;
@@ -294,10 +300,10 @@ export class Stage {
 
         for (let i = 0; i < this.width*this.height; ++ i) {
 
-            if (MAP_DATA[i] == 9) 
+            if (this.data[i] == 9) 
                 this.staticLayer[i] = state ? 10 : 9;
 
-            else if (MAP_DATA[i] == 10) 
+            else if (this.data[i] == 10) 
                 this.staticLayer[i] = state ? 9 : 10;
         }
     }
