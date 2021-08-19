@@ -1,3 +1,4 @@
+import { getColorString } from "./canvas.js";
 import { Bitmap, KeyValuePair } from "./types.js";
 
 
@@ -64,7 +65,35 @@ export class DataGenerator {
     }
 
 
-    private convertToRGB222(image : HTMLCanvasElement, ctx : CanvasRenderingContext2D, alphaLimit = 64) {
+    private addBlackBorder(data : ImageData, 
+        width : number, height : number) {
+
+        let pix = Uint8Array.from(data.data);
+
+        let i = 0;
+        for (let y = 1; y < height; ++ y) {
+
+            for (let x = 0; x < width-1; ++ x) {
+
+                i = (y * width + x) * 4;
+
+                if (pix[i + 3] == 0 &&
+                    (pix[ ( (y-1) * width + x) * 4 + 3] == 255 ||
+                    pix[ ( (y-1) * width + (x-1)) *4 + 3] == 255 ||
+                    pix[ ( y * width + (x-1)) * 4 + 3] == 255)) {
+
+                    data.data[i] = 0;
+                    data.data[i + 1] = 0;
+                    data.data[i + 2] = 0;
+                    data.data[i + 3] = 255;
+                }
+            }
+        }
+    }
+
+
+    private convertToRGB222(image : HTMLCanvasElement, ctx : CanvasRenderingContext2D, 
+        alphaLimit = 64, blackBorder = false) {
 
         let data = ctx.getImageData(0, 0, image.width, image.height);
         let pix = Uint8Array.from(data.data);
@@ -77,6 +106,11 @@ export class DataGenerator {
                 data.data[i + j] *= 85;
             }
             data.data[i + 3] = pix[i + 3] < alphaLimit ? 0 : 255;
+        }
+
+        if (blackBorder) {
+
+            this.addBlackBorder(data, image.width, image.height);
         }
     
         ctx.putImageData(data, 0, 0);
@@ -149,7 +183,8 @@ export class DataGenerator {
 
 
     public generateBitmapFont(name : string,
-        font : string, size : number, width : number, height : number) {
+        font : string, size : number, width : number, height : number,
+        color = 0b111111) {
 
         let canvas = document.createElement("canvas");
         canvas.width = width;
@@ -158,7 +193,7 @@ export class DataGenerator {
         let ctx = canvas.getContext("2d");
         ctx.imageSmoothingEnabled = false;
         ctx.font = "bold " + String(size | 0) + "px " + font;
-        ctx.fillStyle = "white";
+        ctx.fillStyle = getColorString(...this.rgb222[color]);
         ctx.textAlign = "center";
 
         let cw = (width / 16) | 0;
@@ -175,7 +210,7 @@ export class DataGenerator {
             }
         }
 
-        this.convertToRGB222(canvas, ctx, 80);
+        this.convertToRGB222(canvas, ctx, 80, true);
         this.bitmaps.push(new KeyValuePair<Bitmap> (name, canvas));
     }
 
@@ -200,6 +235,24 @@ export class DataGenerator {
             callback(image);
         }
         image.src = path;
+    }
+
+
+    public customDrawFunction(name : string, width : number, height : number,
+        cb : (canvas : HTMLCanvasElement, ctx : CanvasRenderingContext2D) => void,
+        alphaLimit = 64) {
+
+        let canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+
+        let ctx = canvas.getContext("2d");
+        ctx.imageSmoothingEnabled = false;
+
+        cb(canvas, ctx);
+
+        this.convertToRGB222(canvas, ctx, alphaLimit);
+        this.bitmaps.push(new KeyValuePair<Bitmap> (name, canvas));
     }
 
 

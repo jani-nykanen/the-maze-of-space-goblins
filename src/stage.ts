@@ -50,6 +50,8 @@ export class Stage {
     private checkMade : boolean; // Heh, check mate
     private waitTimer : number;
 
+    private stageClear : boolean;
+
     public readonly width : number;
     public readonly height : number;
 
@@ -71,6 +73,7 @@ export class Stage {
 
         this.checkMade = true;
         this.waitTimer = 0;
+        this.stageClear = false;
 
         this.reset();
 
@@ -79,6 +82,7 @@ export class Stage {
             .map((v, i) => (Math.PI*2 / 10) * i);
 
         this.starPos = 0;
+
     }
 
 
@@ -100,6 +104,7 @@ export class Stage {
 
         this.checkMade = true;
         this.waitTimer = 0;
+        this.stageClear = false;
 
         for (let p of this.particles) {
 
@@ -298,9 +303,10 @@ export class Stage {
     }
 
 
-    private checkButtons() {
+    private checkButtonsAndStars() {
 
         let toggle = true;
+        this.stageClear = true;
 
         let i : number;
         for (let y = 0; y < this.height; ++ y) {
@@ -309,12 +315,20 @@ export class Stage {
 
                 i = y * this.width + x;
 
-                if (this.staticLayer[i] == 11 &&
+                if (toggle &&
+                    this.staticLayer[i] == 11 &&
                     this.objectLayer[i] == 0) {
 
                     toggle = false;
-                    break;
                 }
+
+                if (this.stageClear &&
+                    this.staticLayer[i] == 8) {
+
+                    this.stageClear = false;
+                }
+
+                if (!toggle && !this.stageClear) break;
             }
         }
 
@@ -382,7 +396,7 @@ export class Stage {
         
         let somethingMoved = false;
         let first = true;
-        if (!anyMoving) {
+        if (!anyMoving && !this.stageClear) {
             
             if (!this.checkMade) {
 
@@ -392,7 +406,7 @@ export class Stage {
                     this.destroy(event);
                     this.waitTimer = MOVE_TIME;
                 }
-                this.checkButtons();
+                this.checkButtonsAndStars();
             }
             
             if (this.waitTimer <= 0) {
@@ -682,4 +696,7 @@ export class Stage {
         if (this.staticLayerStack.length > MAX_LENGTH)
             this.staticLayerStack.shift();
     }
+
+
+    public isStageClear = () : boolean => this.stageClear;
 }

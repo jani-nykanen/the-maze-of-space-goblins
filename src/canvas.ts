@@ -13,6 +13,13 @@ export const enum Flip {
 };
 
 
+export const getColorString = (r : number, g : number, b : number, a = 1.0) : string =>
+    "rgba(" + String(r | 0) + "," + 
+        String(g | 0) + "," + 
+        String(b | 0) + "," + 
+        String(clamp(a, 0.0, 1.0));
+
+
 export class Canvas {
 
     public readonly width : number;
@@ -69,15 +76,6 @@ export class Canvas {
     }
 
 
-    private getColorString(r : number, g : number, b : number, a = 1.0) : string {
-
-        return "rgba(" + String(r | 0) + "," + 
-            String(g | 0) + "," + 
-            String(b | 0) + "," + 
-            String(clamp(a, 0.0, 1.0));
-    }
-
-
     private resize(width : number, height : number) {
 
         let c = this.canvas;
@@ -124,14 +122,14 @@ export class Canvas {
 
     public clear(r = 0, g = 0, b = 0) {
 
-        this.ctx.fillStyle = this.getColorString(r, g, b);
+        this.ctx.fillStyle = getColorString(r, g, b);
         this.ctx.fillRect(0, 0, this.width, this.height);
     }
 
 
     public setFillColor(r = 0, g = r, b = g, a = 1.0) {
 
-        let colorStr = this.getColorString(r, g, b, a);
+        let colorStr = getColorString(r, g, b, a);
 
         this.ctx.fillStyle = colorStr;
     }
@@ -143,7 +141,7 @@ export class Canvas {
     }
 
 
-    public fillRect(x : number, y : number, w : number, h : number) {
+    public fillRect(x = 0, y = 0, w = this.width, h = this.height) {
 
         x += this.translation.x;
         y += this.translation.y;
@@ -275,7 +273,7 @@ export class Canvas {
             c.fillRect(0, 0, this.width, this.height);
             return;
         }
-        else if (r*r >= Math.hypot(this.width, this.height)) {
+        else if (r*r >= this.width*this.width + this.height*this.height) {
 
             return;
         }
