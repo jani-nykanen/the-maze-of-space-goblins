@@ -611,7 +611,7 @@ export class Stage {
             if (this.objectLayer[i] == 1)
                 return true;
         }
-        while(this.staticLayer[i] == 0 &&
+        while(!SOLID_TILES.includes(this.staticLayer[i]) &&
             this.objectLayer[i] != 0 &&
             (x != sx || y != sy));
 
