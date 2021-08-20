@@ -115,6 +115,8 @@ export class GameScene implements Scene {
 
         if (this.cleared) {
 
+            this.stage.update(event);
+
             if ((this.clearTimer -= event.step) <= 0) {
 
                 event.transition.activate(true, TransitionEffectType.CirleIn,
@@ -122,6 +124,7 @@ export class GameScene implements Scene {
                     [0, 0, 0])
                     .setCenter(new Vector2(80, 72));
             }
+
             return;
         }
 

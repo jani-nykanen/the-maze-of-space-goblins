@@ -3,6 +3,7 @@ import { CoreEvent, Scene } from "./core.js";
 import { GameScene } from "./game.js";
 import { clamp } from "./math.js";
 import { Menu, MenuButton } from "./menu.js";
+import { StarrySkyRenderer } from "./sky.js";
 import { TransitionEffectType } from "./transition.js";
 import { Vector2 } from "./vector.js";
 
@@ -13,6 +14,8 @@ export class TitleScreen implements Scene {
 
     private menu : Menu;
     private startIndex : number;
+
+    private background : StarrySkyRenderer;
 
 
     constructor(param : any, event : CoreEvent) {
@@ -33,6 +36,7 @@ export class TitleScreen implements Scene {
         );
 
         this.menu.activate();
+        this.background = new StarrySkyRenderer();
     }
 
 
@@ -61,6 +65,8 @@ export class TitleScreen implements Scene {
 
     public update(event : CoreEvent) {
 
+        this.background.update(event);
+
         if (event.transition.isActive()) return;
 
         this.menu.update(event);
@@ -69,10 +75,18 @@ export class TitleScreen implements Scene {
 
     public redraw(canvas : Canvas) {
 
-        canvas.clear(0, 85, 170);
+        let logo = canvas.data.getBitmap("logo");
+
+        canvas.clear();
+        this.background.draw(canvas);
+
+        canvas.drawBitmap(logo, canvas.width/2 - logo.width/2, 16);
 
         this.menu.draw(canvas,
-            canvas.width/2 - 38, 96, -8, 13);
+            canvas.width/2 - 38, 88, -8, 13);
+
+        canvas.drawText(canvas.data.getBitmap("font"), 
+            "©2021 JANI NYKÄNEN", canvas.width/2, canvas.height-13, -9, 0, true);
     }
 
 

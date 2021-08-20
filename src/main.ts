@@ -10,7 +10,7 @@ const UFO2 = [0, -1, 0b001011, 0b101010];
 const ROCK1 = [0, -1, 0b101000, 0b111110]; 
 const ROCK2 = [0, -1, 0b101000, 0b010100]; 
 
-const STAR = [0, 0, 0b101011, 0b111111]; 
+const STAR = [-1, 0, 0b101011, 0b111111]; 
 
 const ALIEN_GREEN_1 = [0, -1, 0b101100, 0b011000];
 const ALIEN_GREEN_2 = [0, -1, 0b000100, 0b011000];
@@ -85,7 +85,6 @@ const drawTitle = (canvas : HTMLCanvasElement, ctx : CanvasRenderingContext2D) :
     const OFFSET = 1;
 
     ctx.font = "bold 24px Arial";
-    ctx.fillStyle = "rgb(255, 255, 85)";
     ctx.textAlign = "center";
 
     for (let i = 1; i >= 0; -- i) {
@@ -94,6 +93,23 @@ const drawTitle = (canvas : HTMLCanvasElement, ctx : CanvasRenderingContext2D) :
 
         ctx.fillText("STAGE", canvas.width/2 + OFFSET*i, 24 + OFFSET*i);
         ctx.fillText("CLEAR!", canvas.width/2 + OFFSET*i, 48 + OFFSET*i);
+    }
+}
+
+
+const drawLogo = (canvas : HTMLCanvasElement, ctx : CanvasRenderingContext2D) : void => {
+
+    const OFFSET = 1;
+
+    ctx.font = "bold 28px Arial";
+    ctx.textAlign = "center";
+
+    for (let i = 2; i >= 0; -- i) {
+
+        ctx.fillStyle = i == 0 ? "rgb(170, 255, 255)" : "rgb(85, 170, 170)";
+
+        ctx.fillText("GAME", canvas.width/2 + OFFSET*i, 24 + OFFSET*i);
+        ctx.fillText("LOGO", canvas.width/2 + OFFSET*i, 48 + OFFSET*i);
     }
 }
 
@@ -119,4 +135,5 @@ window.onload = () => (new Core(160, 144))
         event.data.generateBitmapFont("font", "Arial", 10, 256, 256);
         event.data.generateBitmapFont("fontYellow", "Arial", 10, 256, 256, 0b111101);
         event.data.customDrawFunction("clear", 96, 56, drawTitle, 80);
+        event.data.customDrawFunction("logo", 128, 96, drawLogo, 80);
     });
