@@ -1,6 +1,5 @@
-import { Canvas, getColorString } from "./canvas.js";
 import { Core } from "./core.js";
-import { GameScene } from "./game.js";
+import { TitleScreen } from "./title.js";
 
 
 const BRICK = [0, 0b100000, 0b110100, 0b111000]; 
@@ -108,7 +107,7 @@ window.onload = () => (new Core(160, 144))
     .addAction("back", "Backspace")
     .addAction("start", "Enter")
     .addAction("restart", "KeyR")
-    .run(GameScene, event => {
+    .run(TitleScreen, event => {
 
         event.data.loadImage("art.png", img => {
             

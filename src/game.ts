@@ -1,8 +1,10 @@
 import { Canvas } from "./canvas.js";
 import { CoreEvent, Scene } from "./core.js";
 import { State } from "./keyboard.js";
+import { clamp } from "./math.js";
 import { Menu, MenuButton } from "./menu.js";
 import { Stage } from "./stage.js";
+import { TitleScreen } from "./title.js";
 import { TransitionEffectType } from "./transition.js";
 import { Vector2 } from "./vector.js";
 
@@ -10,6 +12,7 @@ import { Vector2 } from "./vector.js";
 
 const CLEAR_LOGO_TIME = 30;
 const CLEAR_WAIT_TIME = 60;
+const START_TIME = 20;
 
 
 export class GameScene implements Scene {
@@ -22,12 +25,14 @@ export class GameScene implements Scene {
     private clearTimer : number;
     private cleared : boolean;
 
+    private startTimer : number;
 
-    constructor() {
 
-        const START_INDEX = 13;
+    constructor(param : number, event : CoreEvent) {
 
-        this.stage = new Stage(START_INDEX);
+        let startIndex = clamp(Number(param), 1, 13);
+
+        this.stage = new Stage(startIndex);
 
         this.pauseMenu = new Menu(
             [
@@ -50,22 +55,35 @@ export class GameScene implements Scene {
                 new MenuButton("QUIT",
                     event => {
 
+                    event.transition.activate(true, TransitionEffectType.BoxVertical,
+                        1.0/30.0, event => event.changeScene(TitleScreen));
                 })
             ]
         );
 
         this.cleared = false;
         this.clearTimer = 0;
+        this.startTimer = START_TIME;
     }
 
 
     private nextStage() {
+
+        try {
+
+            window.localStorage.setItem("jn__spacemonsters_save", String(this.stage.index+1));
+        }
+        catch (e) {
+
+            console.log(e);
+        }
 
         let index = this.stage.index;
         this.stage = new Stage(index+1);
 
         this.cleared = false;
         this.clearTimer = 0;
+        this.startTimer = START_TIME;
     }
 
 
@@ -90,6 +108,11 @@ export class GameScene implements Scene {
       
         if (event.transition.isActive()) return;
 
+        if (this.startTimer > 0) {
+
+            this.startTimer -= event.step;
+        }
+
         if (this.cleared) {
 
             if ((this.clearTimer -= event.step) <= 0) {
@@ -98,9 +121,8 @@ export class GameScene implements Scene {
                     1.0/30.0, () => this.nextStage(), 
                     [0, 0, 0])
                     .setCenter(new Vector2(80, 72));
-
-                return;
             }
+            return;
         }
 
         if (this.pauseMenu.isActive()) {
@@ -216,6 +238,17 @@ export class GameScene implements Scene {
         if (this.cleared) {
 
             this.drawClear(canvas);
+        }
+
+        if (this.startTimer > 0) {
+
+            canvas.setFillColor(0, 0, 0, 0.67);
+            canvas.fillRect();
+
+            canvas.drawText(canvas.data.getBitmap("fontYellow"),
+                "STAGE " + String(this.stage.index), 
+                canvas.width/2, canvas.height/2-8, 
+                -8, 0, true);
         }
     }
     
