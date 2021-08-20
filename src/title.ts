@@ -19,11 +19,13 @@ export class TitleScreen implements Scene {
     private background : StarrySkyRenderer;
     private phase : number;
     private enterTimer : number;
+    private waveTimer : number;
 
 
     constructor(param : any, event : CoreEvent) {
 
         this.startIndex = 1;
+        this.waveTimer = 0;
 
         this.menu = new Menu(
             [
@@ -76,8 +78,11 @@ export class TitleScreen implements Scene {
     public update(event : CoreEvent) {
 
         const ENTER_SPEED = 1.0/60.0;
+        const WAVE_SPEED = 0.05;
 
         this.background.update(event);
+
+        this.waveTimer = (this.waveTimer + WAVE_SPEED*event.step) % (Math.PI*2);
 
         if (event.transition.isActive()) return;
 
@@ -98,16 +103,37 @@ export class TitleScreen implements Scene {
     }
 
 
-    public redraw(canvas : Canvas) {
+    private drawLogo(canvas : Canvas) {
+
+        const AMPLITUDE = 4.0;
 
         let logo = canvas.data.getBitmap("logo");
+
+        let x = canvas.width/2 - logo.width/2;
+        let y = 16;
+
+        let step = Math.PI*2 / logo.height;
+        let dx : number;
+
+        for (let dy = 0; dy < logo.height; ++ dy) {
+
+            dx = Math.round(Math.sin(this.waveTimer + step * dy) * AMPLITUDE);
+
+            canvas.drawBitmapRegion(logo, 0, dy, logo.width, 1,
+                dx + x,  dy + y);
+        }
+        
+    }   
+
+
+    public redraw(canvas : Canvas) {
 
         canvas.clear();
         this.background.draw(canvas);
 
-        let midx = canvas.width/2;
+        this.drawLogo(canvas);
 
-        canvas.drawBitmap(logo, midx - logo.width/2, 16);
+        let midx = canvas.width/2;
 
         if (this.phase == 0) {
 
