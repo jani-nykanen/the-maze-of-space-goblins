@@ -25,7 +25,7 @@ export class GameScene implements Scene {
 
     constructor() {
 
-        const START_INDEX = 1;
+        const START_INDEX = 13;
 
         this.stage = new Stage(START_INDEX);
 
