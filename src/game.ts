@@ -111,6 +111,7 @@ export class GameScene implements Scene {
         if (this.startTimer > 0) {
 
             this.startTimer -= event.step;
+            return;
         }
 
         if (this.cleared) {
@@ -167,39 +168,6 @@ export class GameScene implements Scene {
     }
 
 
-    public drawPause(canvas : Canvas) {
-
-        const WIDTH = 88;
-        const HEIGHT = 72;
-        const MARGIN = 6;
-
-        const COLORS = [
-            0b111111,
-            0,
-            0b000110
-        ];
-
-        canvas.setFillColor(0, 0, 0, 0.67);
-        canvas.fillRect();
-
-        let x = canvas.width/2 - WIDTH/2;
-        let y = canvas.height/2 - HEIGHT/2;
-
-        for (let j = 0; j <= 2; ++ j) {
-
-            canvas.setFillColor(...canvas.data.getRGB222Color(COLORS[j]));
-            canvas.fillRect(
-                x - MARGIN + j, 
-                y - MARGIN + j, 
-                WIDTH + MARGIN*2 - j*2, 
-                HEIGHT + MARGIN*2 - j*2);
-        }
-
-        this.pauseMenu.draw(canvas, 
-            x-2, y+1, -8, 13);
-    }
-
-
     public drawClear(canvas : Canvas) {
         
         canvas.setFillColor(0, 0, 0, 0.67);
@@ -235,7 +203,11 @@ export class GameScene implements Scene {
 
         if (this.pauseMenu.isActive()) {
 
-            this.drawPause(canvas);
+            canvas.setFillColor(0, 0, 0, 0.67);
+            canvas.fillRect();
+
+            this.pauseMenu.draw(canvas, 
+                0, 0, -8, 13, true);
         }
 
         if (this.cleared) {

@@ -1,6 +1,7 @@
 import { Canvas } from "./canvas.js";
 import { CoreEvent, Scene } from "./core.js";
 import { GameScene } from "./game.js";
+import { State } from "./keyboard.js";
 import { clamp } from "./math.js";
 import { Menu, MenuButton } from "./menu.js";
 import { StarrySkyRenderer } from "./sky.js";
@@ -16,6 +17,8 @@ export class TitleScreen implements Scene {
     private startIndex : number;
 
     private background : StarrySkyRenderer;
+    private phase : number;
+    private enterTimer : number;
 
 
     constructor(param : any, event : CoreEvent) {
@@ -37,6 +40,13 @@ export class TitleScreen implements Scene {
 
         this.menu.activate();
         this.background = new StarrySkyRenderer();
+
+        this.phase = 0;
+        this.enterTimer = 1.0;
+
+        event.transition.activate(false,
+            TransitionEffectType.Fade, 1.0/30.0, null,
+            [0, 0, 0], 4);
     }
 
 
@@ -65,9 +75,24 @@ export class TitleScreen implements Scene {
 
     public update(event : CoreEvent) {
 
+        const ENTER_SPEED = 1.0/60.0;
+
         this.background.update(event);
 
         if (event.transition.isActive()) return;
+
+        if (this.phase == 0) {
+
+            this.enterTimer = (this.enterTimer + ENTER_SPEED * event.step) % 1.0;
+
+            if (event.keyboard.getActionState("start") == State.Pressed ||
+                event.keyboard.getActionState("fire") == State.Pressed) {
+
+                ++ this.phase;
+            }
+
+            return;
+        }
 
         this.menu.update(event);
     }
@@ -80,13 +105,26 @@ export class TitleScreen implements Scene {
         canvas.clear();
         this.background.draw(canvas);
 
-        canvas.drawBitmap(logo, canvas.width/2 - logo.width/2, 16);
+        let midx = canvas.width/2;
 
-        this.menu.draw(canvas,
-            canvas.width/2 - 38, 88, -8, 13);
+        canvas.drawBitmap(logo, midx - logo.width/2, 16);
+
+        if (this.phase == 0) {
+
+            if (this.enterTimer < 0.5) {
+
+                canvas.drawText(canvas.data.getBitmap("fontYellow"), 
+                    "PRESS ENTER", midx, canvas.height-40, -9, 0, true);
+            }
+        }
+        else {
+
+            this.menu.draw(canvas,
+                0, 32, -8, 13, true);
+        }
 
         canvas.drawText(canvas.data.getBitmap("font"), 
-            "©2021 JANI NYKÄNEN", canvas.width/2, canvas.height-13, -9, 0, true);
+            "©2021 JANI NYKÄNEN", midx, canvas.height-13, -9, 0, true);
     }
 
 

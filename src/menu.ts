@@ -43,12 +43,17 @@ export class Menu {
     private cursorPos : number;
     private active : boolean;
 
+    private maxLength : number;
+
 
     constructor(buttons : Array<MenuButton>) {
 
         this.buttons = (new Array<MenuButton> (buttons.length))
             .fill(null)
             .map((b, i) => buttons[i].clone());
+
+        this.maxLength = Math.max(
+            ...this.buttons.map(b => b.getText().length));
 
         this.cursorPos = 0;
         this.active = false;
@@ -102,13 +107,54 @@ export class Menu {
     }
 
 
+    private drawBox(canvas : Canvas, x : number, y : number,
+        w : number, h : number) {
+
+        const MARGIN = 6;
+
+        const COLORS = [
+            0b111111,
+            0,
+            0b000110
+        ];
+
+        let dx = canvas.width/2 - w/2 + x;
+        let dy = canvas.height/2 - h/2 + y;
+
+        for (let j = 0; j <= 2; ++ j) {
+
+            canvas.setFillColor(...canvas.data.getRGB222Color(COLORS[j]));
+            canvas.fillRect(
+                dx - MARGIN + j, 
+                dy - MARGIN + j, 
+                w + MARGIN*2 - j*2, 
+                h + MARGIN*2 - j*2);
+        }
+
+    }
+
+
     public draw(canvas : Canvas, x : number, y : number,
-        xoff = -4, yoff = 0) {
+        xoff = -9, yoff = 12, box = false) {
+
+        if (!this.active) return;
 
         let str = "";
 
         let font = canvas.data.getBitmap("font");
         let fontYellow = canvas.data.getBitmap("fontYellow");
+
+        let w = (this.maxLength+1) * (16 + xoff);
+        let h = (this.buttons.length * yoff);
+
+        let dx = canvas.width/2 - w / 2 + x;
+        let dy = canvas.height/2 - h / 2 + y;
+
+        if (box) {
+
+            this.drawBox(canvas, x, y, w, h);
+            dx -= 2;
+        }
 
         for (let i = 0; i < this.buttons.length; ++ i) {
 
@@ -118,13 +164,13 @@ export class Menu {
                 str = " " + str;
 
                 canvas.drawBitmapRegion(canvas.data.getBitmap("art1"),
-                    176, 8, 8, 8, x + 2, y + i * yoff + 3);
+                    176, 8, 8, 8, dx + 2, dy + i * yoff + 3);
             }
             
 
             canvas.drawText(
                 i == this.cursorPos ? fontYellow : font, 
-                str, x, y + i * yoff, xoff, 0);
+                str, dx, dy + i * yoff, xoff, 0);
         } 
     }
 

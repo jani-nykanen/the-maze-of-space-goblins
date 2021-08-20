@@ -1,4 +1,5 @@
 import { getColorString } from "./canvas.js";
+import { clamp } from "./math.js";
 import { Bitmap, KeyValuePair } from "./types.js";
 
 
@@ -102,8 +103,7 @@ export class DataGenerator {
 
             for (let j = 0; j < 3; ++ j) {
 
-                data.data[i + j] = (pix[i + j] / 85) | 0;
-                data.data[i + j] *= 85;
+                data.data[i + j] = clamp(Math.round(pix[i + j] / 85) * 85, 0, 255);
             }
             data.data[i + 3] = pix[i + 3] < alphaLimit ? 0 : 255;
         }
