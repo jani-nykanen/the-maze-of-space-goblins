@@ -1,6 +1,7 @@
 import { Canvas } from "./canvas.js";
 import { CoreEvent, Scene } from "./core.js";
 import { State } from "./keyboard.js";
+import { MAP_DATA } from "./mapdata.js";
 import { clamp } from "./math.js";
 import { Menu, MenuButton } from "./menu.js";
 import { Stage } from "./stage.js";
@@ -30,7 +31,7 @@ export class GameScene implements Scene {
 
     constructor(param : number, event : CoreEvent) {
 
-        let startIndex = clamp(Number(param), 1, 15);
+        let startIndex = clamp(Number(param), 1, MAP_DATA.length);
 
         this.stage = new Stage(startIndex);
 

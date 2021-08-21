@@ -2,6 +2,7 @@ import { Canvas } from "./canvas.js";
 import { CoreEvent, Scene } from "./core.js";
 import { GameScene } from "./game.js";
 import { State } from "./keyboard.js";
+import { MAP_DATA } from "./mapdata.js";
 import { clamp } from "./math.js";
 import { Menu, MenuButton } from "./menu.js";
 import { StarrySkyRenderer } from "./sky.js";
@@ -59,7 +60,9 @@ export class TitleScreen implements Scene {
             
             try {
 
-                this.startIndex = clamp(Number(window.localStorage.getItem("jn__spacemonsters_save")), 1, 13);
+                this.startIndex = clamp(
+                    Number(window.localStorage.getItem("jn__spacemonsters_save")), 
+                    1, MAP_DATA.length);
             }
             catch (e) {
 
