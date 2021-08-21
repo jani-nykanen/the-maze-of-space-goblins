@@ -115,7 +115,7 @@ export class TitleScreen implements Scene {
         let x = canvas.width/2 - logo.width/2;
         let y = 16;
 
-        let step = Math.PI*2 / logo.height;
+        let step = (Math.PI*2) / logo.height;
         let dx : number;
 
         for (let dy = 0; dy < logo.height; ++ dy) {

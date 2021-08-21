@@ -86,7 +86,7 @@ const PALETTE_3 = [
 ];
 
 
-const drawTitle = (canvas : HTMLCanvasElement, ctx : CanvasRenderingContext2D) : void => {
+const drawStageClear = (canvas : HTMLCanvasElement, ctx : CanvasRenderingContext2D) : void => {
 
     const OFFSET = 1;
 
@@ -111,11 +111,19 @@ const drawLogo = (canvas : HTMLCanvasElement, ctx : CanvasRenderingContext2D) : 
     ctx.textAlign = "center";
 
     for (let i = 2; i >= 0; -- i) {
-
+        
         ctx.fillStyle = i == 0 ? "rgb(170, 255, 255)" : "rgb(85, 170, 170)";
 
-        ctx.fillText("GAME", canvas.width/2 + OFFSET*i, 24 + OFFSET*i);
-        ctx.fillText("LOGO", canvas.width/2 + OFFSET*i, 48 + OFFSET*i);
+        if (i < 2) {
+
+           
+            ctx.font = "12px Arial";
+            ctx.fillText("THE MAZE OF", canvas.width/2 + OFFSET*i, 12 + OFFSET*i);
+        }
+
+        ctx.font = "bold 24px Arial";
+        ctx.fillText("SPACE", canvas.width/2 + OFFSET*i, 33 + OFFSET*i);
+        ctx.fillText("GOBLINS", canvas.width/2 + OFFSET*i, 54 + OFFSET*i);
     }
 }
 
@@ -140,6 +148,6 @@ window.onload = () => (new Core(160, 144))
 
         event.data.generateBitmapFont("font", "Arial", 10, 256, 256);
         event.data.generateBitmapFont("fontYellow", "Arial", 10, 256, 256, 0b111101);
-        event.data.customDrawFunction("clear", 96, 56, drawTitle, 80);
+        event.data.customDrawFunction("clear", 96, 56, drawStageClear, 80);
         event.data.customDrawFunction("logo", 128, 96, drawLogo, 80);
     });
