@@ -30,7 +30,7 @@ export class GameScene implements Scene {
 
     constructor(param : number, event : CoreEvent) {
 
-        let startIndex = clamp(Number(param), 1, 13);
+        let startIndex = clamp(Number(param), 1, 15);
 
         this.stage = new Stage(startIndex);
 
