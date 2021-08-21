@@ -1,5 +1,6 @@
 import { Canvas } from "./canvas.js";
 import { CoreEvent, Scene } from "./core.js";
+import { Intro } from "./intro.js";
 import { State } from "./keyboard.js";
 import { MAP_DATA } from "./mapdata.js";
 import { clamp } from "./math.js";
@@ -121,10 +122,19 @@ export class GameScene implements Scene {
 
             if ((this.clearTimer -= event.step) <= 0) {
 
-                event.transition.activate(true, TransitionEffectType.CirleIn,
-                    1.0/30.0, () => this.nextStage(), 
-                    [0, 0, 0])
-                    .setCenter(new Vector2(80, 72));
+                if (this.stage.isFinalStage()) {
+
+                    event.transition.activate(true, TransitionEffectType.Fade,
+                        1.0/60.0, event => event.changeScene(Intro), 
+                        [255, 255, 255], 4);
+                }
+                else {
+
+                    event.transition.activate(true, TransitionEffectType.CirleIn,
+                        1.0/30.0, () => this.nextStage(), 
+                        [0, 0, 0])
+                        .setCenter(new Vector2(80, 72));
+                }
             }
 
             return;
@@ -229,5 +239,5 @@ export class GameScene implements Scene {
     }
     
     
-    public dispose = () : void => <any> 0;
+    public dispose = () : void => <any> (this.cleared && this.stage.isFinalStage() ? 1 : 0);
 }

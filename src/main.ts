@@ -24,7 +24,13 @@ const ALIEN_YELLOW_2 = [0, -1, 0b100100, 0b111000]
 const FACE = [0, -1, 0b101010, 0b111111];
 
 const PSTAR_1 = [0, -1, 0b111110, 0b111100];
-const PSTAR_2 = [0, -1, 0b111000 ,0b111100];
+const PSTAR_2 = [0, -1, 0b111000, 0b111100];
+
+const PSTAR_1_GREEN = [0, -1, 0b111110, 0b101100];
+const PSTAR_2_GREEN = [0, -1, 0b011000, 0b101100];
+
+const PSTAR_1_BLUE = [0, -1, 0b101111, 0b001111];
+const PSTAR_2_BLUE = [0, -1, 0b011011, 0b001111];
 
 const CROSS = [0, -1, 0b100111, 0b010010];
 const GRAY_TO_BLACK = [0b010101, -1, -1, -1];
@@ -53,13 +59,13 @@ const PALETTE_2 = [
     // Line 1
     null, null, null, null, null, null, null, null,
     null, null, null, null, ALIEN_BLUE_1, ALIEN_BLUE_2, ALIEN_BLUE_1, ALIEN_BLUE_2,
-    ALIEN_BLUE_1, ALIEN_BLUE_2,  null, null, null, null, GRAY_TO_BLACK, null,
+    ALIEN_BLUE_1, ALIEN_BLUE_2,  null, null, PSTAR_1_BLUE, PSTAR_2_BLUE, GRAY_TO_BLACK, null,
     null,  null,  null, null, null, null, null, null,
 
     // Line 2
     null, null, null, null, null, null, null, null,
     null, null, null, null, ALIEN_BLUE_2, ALIEN_BLUE_2, ALIEN_BLUE_2, ALIEN_BLUE_2, 
-    ALIEN_BLUE_2, ALIEN_BLUE_2,  null, null, null, null, null, null,
+    ALIEN_BLUE_2, ALIEN_BLUE_2,  null, null, PSTAR_2_BLUE, PSTAR_2_BLUE, null, null,
     null,  null,  null, null, null, null, null, null,
 ];
 
@@ -69,13 +75,13 @@ const PALETTE_3 = [
     // Line 1
     null, null, null, null, null, null, null, null,
     null, null, null, null, ALIEN_YELLOW_1, ALIEN_YELLOW_2, ALIEN_YELLOW_1, ALIEN_YELLOW_2,
-    ALIEN_YELLOW_1, ALIEN_YELLOW_2,  null, null, null, null, null, null,
+    ALIEN_YELLOW_1, ALIEN_YELLOW_2,  null, null, PSTAR_1_GREEN, PSTAR_2_GREEN, null, null,
     null,  null,  null, null, null, null, null, null,
 
     // Line 2
     null, null, null, null, null, null, null, null,
     null, null, null, null, ALIEN_YELLOW_2, ALIEN_YELLOW_2, ALIEN_YELLOW_2, ALIEN_YELLOW_2, 
-    ALIEN_YELLOW_2, ALIEN_YELLOW_2,  null, null, null, null, null, null,
+    ALIEN_YELLOW_2, ALIEN_YELLOW_2,  null, null, PSTAR_2_GREEN, PSTAR_2_GREEN, null, null,
     null,  null,  null, null, null, null, null, null,
 ];
 

@@ -5,7 +5,7 @@ import { MAP_DATA, MAP_HEIGHT, MAP_WIDTH } from "./mapdata.js";
 import { negMod } from "./math.js";
 import { Particle } from "./particle.js";
 import { StarrySkyRenderer } from "./sky.js";
-import { nextObject } from "./types.js";
+import { Bitmap, nextObject } from "./types.js";
 import { Vector2 } from "./vector.js";
 
 
@@ -23,7 +23,7 @@ const PARTICLE_PALETTES = [
     [0b000110, 0b101111, 0b011011],
     [0b100100, 0b111110, 0b111000],
     [0b101100, 0b011011, 0b111000],
-    [0b111000 ,0b111100, 0b111110]
+    [0b111000, 0b111100, 0b111110]
 ];
 
 
@@ -46,6 +46,7 @@ export class Stage {
     private particles : Array<Particle>;
     
     private background : StarrySkyRenderer;
+    private finalStarTimer : number;
 
     private checkMade : boolean; // Heh, check mate
     private waitTimer : number;
@@ -80,6 +81,7 @@ export class Stage {
         this.checkMade = true;
         this.waitTimer = 0;
         this.stageClear = false;
+        this.finalStarTimer = 0;
 
         this.reset();
 
@@ -365,6 +367,10 @@ export class Stage {
 
     public update(event : CoreEvent) {
 
+        const FINAL_STAR_ANIMATION_SPEED = 1.0 / 12.0;
+
+        this.finalStarTimer = (this.finalStarTimer + FINAL_STAR_ANIMATION_SPEED * event.step) % 1.0;
+
         this.background.update(event);
 
         for (let p of this.particles) {
@@ -434,7 +440,12 @@ export class Stage {
 
         const SRCX = [0, , , , , , , 10];
 
-        let bmp = canvas.data.getBitmap("art1");
+        let bmps = 
+            [canvas.data.getBitmap("art1"),
+            canvas.data.getBitmap("art2"),
+            canvas.data.getBitmap("art3")
+            ];
+        let bmp : Bitmap;
 
         let tid : number;
 
@@ -444,6 +455,8 @@ export class Stage {
 
                 tid = this.staticLayer[y * this.width + x];
                 if (tid == 0) continue;
+
+                bmp = bmps[0];
 
                 switch (tid) {
 
@@ -499,6 +512,13 @@ export class Stage {
                         x*16+4, y*16+3);
 
                     break;
+
+                case 8:
+
+                    if (this.isFinalStage()) {
+
+                        bmp = bmps[Math.floor(this.finalStarTimer*3)];
+                    }
 
                 default:
                     canvas.drawBitmapRegion(bmp, 
@@ -642,4 +662,5 @@ export class Stage {
 
 
     public isStageClear = () : boolean => this.stageClear;
+    public isFinalStage = () : boolean => this.index == MAP_DATA.length;
 }
