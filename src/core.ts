@@ -139,11 +139,4 @@ export class Core {
         this.activeScene = new newScene.prototype.constructor(param, this.event);
     }
     
-
-    public addAction(name : string, key : string) : Core { 
-        
-        this.keyboard.addAction(name, key);
-        return this;
-    }
-
 }

@@ -2,6 +2,7 @@ import { Canvas } from "./canvas.js";
 import { CoreEvent } from "./core.js";
 import { negMod } from "./math.js";
 import { State } from "./keyboard.js";
+import { drawBox } from "./misc.js";
 
 
 export class MenuButton {
@@ -107,33 +108,6 @@ export class Menu {
     }
 
 
-    private drawBox(canvas : Canvas, x : number, y : number,
-        w : number, h : number) {
-
-        const MARGIN = 6;
-
-        const COLORS = [
-            0b111111,
-            0,
-            0b000110
-        ];
-
-        let dx = canvas.width/2 - w/2 + x;
-        let dy = canvas.height/2 - h/2 + y;
-
-        for (let j = 0; j <= 2; ++ j) {
-
-            canvas.setFillColor(...canvas.data.getRGB222Color(COLORS[j]));
-            canvas.fillRect(
-                dx - MARGIN + j, 
-                dy - MARGIN + j, 
-                w + MARGIN*2 - j*2, 
-                h + MARGIN*2 - j*2);
-        }
-
-    }
-
-
     public draw(canvas : Canvas, x : number, y : number,
         xoff = -9, yoff = 12, box = false) {
 
@@ -152,7 +126,7 @@ export class Menu {
 
         if (box) {
 
-            this.drawBox(canvas, x, y, w, h);
+            drawBox(canvas, x, y, w, h);
             dx -= 2;
         }
 

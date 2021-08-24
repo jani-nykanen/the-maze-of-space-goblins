@@ -105,6 +105,8 @@ export class Keyboard {
             else if (k.value == State.Pressed)
                 k.value = State.Down;
         }
+
+        this.anyPressed = false;
     }
 
 
@@ -134,10 +136,12 @@ export class Keyboard {
     }
 
 
-    public addAction(name : string, key : string) {
+    public addAction(name : string, key : string) : Keyboard {
 
         this.actions.push(new KeyValuePair<string>(name, key));
         this.prevent.push(key);
+
+        return this;
     }
 
 

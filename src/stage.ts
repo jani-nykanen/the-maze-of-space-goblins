@@ -85,7 +85,7 @@ export class Stage {
 
         this.reset();
 
-        this.background = new StarrySkyRenderer(0.5);
+        this.background = new StarrySkyRenderer(new Vector2(0, 0.5));
 
     }
 

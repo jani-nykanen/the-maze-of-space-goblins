@@ -1,6 +1,7 @@
 import { Canvas } from "./canvas.js";
 import { CoreEvent } from "./core.js";
 import { negMod } from "./math.js";
+import { Vector2 } from "./vector.js";
 
 
 
@@ -8,18 +9,18 @@ export class StarrySkyRenderer {
 
 
     private sparkTimes : Array<number>;
-    private starPos : number;
-    private scrollSpeed : number;
+    private starPos : Vector2;
+    private scrollSpeed : Vector2;
 
 
-    constructor(scrollSpeed = 0) {
+    constructor(scrollSpeed = new Vector2(0, 0)) {
 
         this.sparkTimes = (new Array<number> (10))
             .fill(0)
             .map((v, i) => (Math.PI*2 / 10) * i);
 
-        this.starPos = 0;
-        this.scrollSpeed = scrollSpeed;
+        this.starPos = new Vector2(8, 0);
+        this.scrollSpeed = scrollSpeed.clone();
     }
 
 
@@ -42,7 +43,8 @@ export class StarrySkyRenderer {
             this.sparkTimes[i] = 
                 (this.sparkTimes[i] + SPARK_SPEED*event.step) % (Math.PI*2);
         }
-        this.starPos = (this.starPos + this.scrollSpeed * event.step) % 160;
+        this.starPos.x = (this.starPos.x + this.scrollSpeed.x * event.step) % 176;
+        this.starPos.y = (this.starPos.y + this.scrollSpeed.y * event.step) % 160;
     }
 
 
@@ -56,13 +58,14 @@ export class StarrySkyRenderer {
         let x : number;
         let y : number;
 
-        let p = Math.round(this.starPos);
+        let px = Math.round(this.starPos.x);
+        let py = Math.round(this.starPos.y);
         
         canvas.setFillColor(0);
         for (let i = 0; i < SMALL_STARS.length; ++ i) {
 
-            x = SMALL_STARS[i][0]*8;
-            y = -8 + negMod(SMALL_STARS[i][1]*8 + p, 160);
+            x = -8 + negMod(SMALL_STARS[i][0]*8 + px, 176);
+            y = -8 + negMod(SMALL_STARS[i][1]*8 + py, 160);
 
             canvas.drawBitmapRegion(bmp, 80, 0, 8, 8, x, y);
 
@@ -71,8 +74,8 @@ export class StarrySkyRenderer {
 
         for (let i = 0; i < BIG_STARS.length; ++ i) {
 
-            x = BIG_STARS[i][0]*8;
-            y = -8 + negMod(BIG_STARS[i][1]*8 + p, 160);
+            x = -8 + negMod(BIG_STARS[i][0]*8 + px, 176);
+            y = -8 + negMod(BIG_STARS[i][1]*8 + py, 160);
 
             canvas.drawBitmapRegion(bmp, 80, 8, 8, 8, x, y);
 

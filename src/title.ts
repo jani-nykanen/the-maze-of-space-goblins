@@ -1,6 +1,7 @@
 import { Canvas } from "./canvas.js";
 import { CoreEvent, Scene } from "./core.js";
 import { GameScene } from "./game.js";
+import { Intro } from "./intro.js";
 import { State } from "./keyboard.js";
 import { MAP_DATA } from "./mapdata.js";
 import { clamp } from "./math.js";
@@ -72,7 +73,7 @@ export class TitleScreen implements Scene {
         }
 
         event.transition.activate(true, TransitionEffectType.CirleIn, 1.0/30.0,
-            event => event.changeScene(GameScene),
+            event => event.changeScene(this.startIndex == 1 ? Intro : GameScene),
             [0, 0, 0])
             .setCenter(new Vector2(80, 72));
     }

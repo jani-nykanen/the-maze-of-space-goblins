@@ -52,8 +52,8 @@ export class GameScene implements Scene {
                 new MenuButton("CONTROLS",
                     () => {}
                 ),
-                new MenuButton("AUDIO: OFF",
-                    () => {}),
+                //new MenuButton("AUDIO: OFF",
+                //    () => {}),
                 new MenuButton("QUIT",
                     event => {
 
@@ -66,6 +66,9 @@ export class GameScene implements Scene {
         this.cleared = false;
         this.clearTimer = 0;
         this.startTimer = START_TIME;
+
+        event.transition.activate(false, TransitionEffectType.CirleIn,
+            1.0/30.0, null).setCenter(new Vector2(80, 72));
     }
 
 
@@ -219,6 +222,10 @@ export class GameScene implements Scene {
 
             this.pauseMenu.draw(canvas, 
                 0, 0, -8, 13, true);
+
+            canvas.drawText(canvas.data.getBitmap("font"),
+                "HINT: PRESS B.SPACE\nTO UNDO A MOVE.", -3, 144-24,
+                -8, -6);
         }
 
         if (this.cleared) {
@@ -239,5 +246,5 @@ export class GameScene implements Scene {
     }
     
     
-    public dispose = () : void => <any> (this.cleared && this.stage.isFinalStage() ? 1 : 0);
+    public dispose = () : void => <any> (this.cleared && this.stage.isFinalStage() ? 2 : 0);
 }

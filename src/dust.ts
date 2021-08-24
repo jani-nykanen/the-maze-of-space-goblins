@@ -11,6 +11,7 @@ export class Dust extends ExistingObject {
     private timer : number;
     private maxTime : number;
     private radius : number;
+    private speed : Vector2;
 
 
     constructor() {
@@ -21,17 +22,19 @@ export class Dust extends ExistingObject {
         this.timer = 0;
         this.maxTime = 1;
         this.radius = 0;
+        this.speed = new Vector2();
 
         this.exist = false;
     }
 
 
-    public spawn(x : number, y : number, time : number, radius : number) {
+    public spawn(x : number, y : number, time : number, radius : number, speed = new Vector2()) {
 
         this.pos = new Vector2(x, y);
         this.maxTime = time;
         this.timer = 0;
         this.radius = radius;
+        this.speed = speed.clone();
 
         this.exist = true;
     }
@@ -40,6 +43,9 @@ export class Dust extends ExistingObject {
     public update(event : CoreEvent) {
 
         if (!this.exist) return;
+
+        this.pos.x += this.speed.x * event.step;
+        this.pos.y += this.speed.y * event.step;
 
         if ((this.timer += event.step) >= this.maxTime) {
 

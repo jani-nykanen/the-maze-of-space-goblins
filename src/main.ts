@@ -129,15 +129,16 @@ const drawLogo = (canvas : HTMLCanvasElement, ctx : CanvasRenderingContext2D) : 
 
 
 window.onload = () => (new Core(160, 144))
-    .addAction("left", "ArrowLeft")
-    .addAction("up", "ArrowUp")
-    .addAction("right", "ArrowRight")
-    .addAction("down", "ArrowDown")
-    .addAction("fire", "Space")
-    .addAction("back", "Backspace")
-    .addAction("start", "Enter")
-    .addAction("restart", "KeyR")
     .run(TitleScreen, event => {
+
+        event.keyboard.addAction("left", "ArrowLeft")
+            .addAction("up", "ArrowUp")
+            .addAction("right", "ArrowRight")
+            .addAction("down", "ArrowDown")
+            .addAction("fire", "Space")
+            .addAction("back", "Backspace")
+            .addAction("start", "Enter")
+            .addAction("restart", "KeyR");
 
         event.data.loadImage("art.png", img => {
             
