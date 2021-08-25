@@ -1,5 +1,5 @@
+import { AudioIntro } from "./audiointro.js";
 import { Core } from "./core.js";
-import { TitleScreen } from "./title.js";
 
 
 const BRICK = [0, 0b100000, 0b110100, 0b111000]; 
@@ -129,7 +129,9 @@ const drawLogo = (canvas : HTMLCanvasElement, ctx : CanvasRenderingContext2D) : 
 
 
 window.onload = () => (new Core(160, 144))
-    .run(TitleScreen, event => {
+    .run(AudioIntro, event => {
+
+        event.sound.toggle(false);
 
         event.keyboard.addAction("left", "ArrowLeft")
             .addAction("up", "ArrowUp")

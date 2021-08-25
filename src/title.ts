@@ -7,6 +7,7 @@ import { MAP_DATA } from "./mapdata.js";
 import { clamp } from "./math.js";
 import { Menu, MenuButton } from "./menu.js";
 import { StarrySkyRenderer } from "./sky.js";
+import { SoundSource } from "./soundsrc.js";
 import { TransitionEffectType } from "./transition.js";
 import { Vector2 } from "./vector.js";
 
@@ -98,10 +99,12 @@ export class TitleScreen implements Scene {
                 event.keyboard.getActionState("fire") == State.Pressed) {
 
                 ++ this.phase;
+                event.sound.playSequence(SoundSource.StartBeep, 0.60, "square");
             }
 
             return;
         }
+
 
         this.menu.update(event);
     }

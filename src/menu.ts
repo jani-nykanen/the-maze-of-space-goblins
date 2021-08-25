@@ -3,6 +3,7 @@ import { CoreEvent } from "./core.js";
 import { negMod } from "./math.js";
 import { State } from "./keyboard.js";
 import { drawBox } from "./misc.js";
+import { SoundSource } from "./soundsrc.js";
 
 
 export class MenuButton {
@@ -93,7 +94,7 @@ export class Menu {
 
         if (oldPos != this.cursorPos) {
 
-            // TODO: Possibly play audio here
+            event.sound.playSequence(SoundSource.Choose, 0.60, "square");
 
             this.cursorPos = negMod(this.cursorPos, this.buttons.length);
         }
@@ -102,6 +103,8 @@ export class Menu {
         
         if (event.keyboard.getActionState("fire") == State.Pressed ||
             event.keyboard.getActionState("start") == State.Pressed) {
+
+            event.sound.playSequence(SoundSource.Select, 0.60, "square");
 
             activeButton.evaluateCallback(event);
         }

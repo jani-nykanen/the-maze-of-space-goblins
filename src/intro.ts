@@ -4,6 +4,7 @@ import { Dust } from "./dust.js";
 import { GameScene } from "./game.js";
 import { drawBox } from "./misc.js";
 import { StarrySkyRenderer } from "./sky.js";
+import { SoundSource } from "./soundsrc.js";
 import { TransitionEffectType } from "./transition.js";
 import { nextObject } from "./types.js";
 import { Vector2 } from "./vector.js";
@@ -82,6 +83,12 @@ export class Intro implements Scene {
         this.ufoPos = new Vector2(80, 24);
         this.dust = new Array<Dust> ();
         this.dustTimer = 0;
+
+        if (this.phase == 0) {
+
+            event.transition.activate(false,
+                TransitionEffectType.Fade, 1.0/30.0, null, [0, 0, 0], 4);
+        }
     }
 
 
@@ -130,6 +137,7 @@ export class Intro implements Scene {
             if (event.keyboard.isAnyPressed()) {
 
                 this.charIndex = STORY[this.phase][this.textIndex].length;
+                // event.sound.playSequence(SoundSource.Choose, 0.60, "sawtooth");
             }
             else if ((this.charTimer += event.step) >= CHAR_TIME) {
 
@@ -158,6 +166,8 @@ export class Intro implements Scene {
                     this.charIndex = 0;
                     this.charTimer = 0;
                 }
+
+                event.sound.playSequence(SoundSource.IntroBeep, 0.60, "square");
             }
         }
     }
