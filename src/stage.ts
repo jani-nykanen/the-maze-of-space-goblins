@@ -5,6 +5,7 @@ import { MAP_DATA, MAP_HEIGHT, MAP_WIDTH } from "./mapdata.js";
 import { negMod } from "./math.js";
 import { Particle } from "./particle.js";
 import { StarrySkyRenderer } from "./sky.js";
+import { SoundSource } from "./soundsrc.js";
 import { Bitmap, nextObject } from "./types.js";
 import { Vector2 } from "./vector.js";
 
@@ -55,6 +56,8 @@ export class Stage {
 
     private data : Array<number>;
 
+    private oldToggleState : boolean;
+
     public readonly width : number;
     public readonly height : number;
     public readonly index : number;
@@ -82,6 +85,7 @@ export class Stage {
         this.waitTimer = 0;
         this.stageClear = false;
         this.finalStarTimer = 0;
+        this.oldToggleState = false;
 
         this.reset();
 
@@ -109,6 +113,7 @@ export class Stage {
         this.checkMade = true;
         this.waitTimer = 0;
         this.stageClear = false;
+        this.oldToggleState = false;
 
         for (let p of this.particles) {
 
@@ -215,7 +220,9 @@ export class Stage {
     }
 
 
-    private checkConnections() : boolean {
+    private checkConnections(event : CoreEvent) : boolean {
+
+        const STAR_WAIT = 20;
 
         let neighborCount = (new Array<number> (this.width*this.height)).fill(0);
   
@@ -237,6 +244,9 @@ export class Stage {
                         this.staticLayer[i] = 0;
                         this.spawnParticles(x*16 + 8, y*16 + 8,
                             0.5, 1.0, 16, PARTICLE_PALETTES[4]);
+
+                        this.waitTimer = STAR_WAIT;
+                        event.sound.playSequence(SoundSource.Star, 0.60, "sine");
                     }
                     continue;
                 }
@@ -275,20 +285,37 @@ export class Stage {
     }
 
 
-    private toggleWalls(state : boolean) {
+    private toggleWalls(state : boolean, event : CoreEvent) {
+
+        const WALL_WAIT = 16;
+
+        let toggled = false;
 
         for (let i = 0; i < this.width*this.height; ++ i) {
 
-            if (this.data[i] == 9) 
-                this.staticLayer[i] = state ? 10 : 9;
+            if (this.data[i] == 9) {
 
-            else if (this.data[i] == 10) 
+                this.staticLayer[i] = state ? 10 : 9;
+                toggled = true;
+            }
+
+            else if (this.data[i] == 10) {
+
                 this.staticLayer[i] = state ? 9 : 10;
+                toggled = true;
+            }
         }
+
+        if (toggled && this.oldToggleState != state) {
+
+            event.sound.playSequence(SoundSource.ToggleWalls, 0.60, "square");
+            this.waitTimer = WALL_WAIT;
+        }
+        this.oldToggleState = state;
     }
 
 
-    private checkButtonsAndStars() {
+    private checkButtonsAndStars(event : CoreEvent) {
 
         let toggle = true;
         this.stageClear = true;
@@ -317,7 +344,7 @@ export class Stage {
             }
         }
 
-        this.toggleWalls(toggle);
+        this.toggleWalls(toggle, event);
     }
 
 
@@ -362,12 +389,15 @@ export class Stage {
                     0.5, 1.0, 24, PARTICLE_PALETTES[a.id-2]);
             }
         }
+
+        event.sound.playSequence(SoundSource.Destroy, 0.70, "sawtooth");
     }
 
 
     public update(event : CoreEvent) {
 
         const FINAL_STAR_ANIMATION_SPEED = 1.0 / 12.0;
+        const WAIT_TIME = 20;
 
         this.finalStarTimer = (this.finalStarTimer + FINAL_STAR_ANIMATION_SPEED * event.step) % 1.0;
 
@@ -390,17 +420,19 @@ export class Stage {
         
         let somethingMoved = false;
         let first = true;
+        let playMoveSound = false;
+
         if (!anyMoving && !this.stageClear) {
             
             if (!this.checkMade) {
 
                 this.checkMade = true;
-                if (this.checkConnections()) {
+                if (this.checkConnections(event)) {
 
                     this.destroy(event);
-                    this.waitTimer = MOVE_TIME;
+                    this.waitTimer = WAIT_TIME;
                 }
-                this.checkButtonsAndStars();
+                this.checkButtonsAndStars(event);
             }
             
             if (this.waitTimer <= 0) {
@@ -415,6 +447,9 @@ export class Stage {
 
                             somethingMoved = true;
                             first = false;
+
+                            if (a.id > 0)
+                                playMoveSound = true;
                         }
                     }
 
@@ -427,6 +462,11 @@ export class Stage {
 
                 this.waitTimer -= event.step;
             }
+        }
+
+        if (playMoveSound) {
+
+            event.sound.playSequence(SoundSource.MoveBeep, 0.50, "square");
         }
 
         for (let a of this.agents) {
@@ -546,6 +586,15 @@ export class Stage {
 
             p.draw(canvas);
         }
+    }
+
+
+    public isInsidePurpleWall(x : number, y : number) : boolean {
+
+        x = negMod(x, this.width);
+        y = negMod(y, this.height);
+
+        return this.staticLayer[y * this.width + x] == 10;
     }
 
 

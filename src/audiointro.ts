@@ -1,7 +1,7 @@
 import { Canvas } from "./canvas.js";
 import { CoreEvent, Scene } from "./core.js";
 import { Menu, MenuButton } from "./menu.js";
-import { TitleScreen } from "./title.js";
+import { StartIntro } from "./startintro.js";
 
 
 const TEXT =
@@ -28,7 +28,7 @@ export class AudioIntro implements Scene {
 
                         event.sound.toggle(true);
 
-                        event.changeScene(TitleScreen);
+                        event.changeScene(StartIntro);
                     }),
 
                 new MenuButton("NO",
@@ -36,7 +36,7 @@ export class AudioIntro implements Scene {
 
                         event.sound.toggle(false);
 
-                        event.changeScene(TitleScreen);
+                        event.changeScene(StartIntro);
                     })
             ]
         );

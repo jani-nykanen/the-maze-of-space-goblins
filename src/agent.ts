@@ -180,7 +180,7 @@ export class Agent extends ExistingObject {
 
     public control(stage : Stage, isFirst : boolean, event : CoreEvent) : boolean {
 
-        if (this.moving) return false;
+        if (!this.exist || this.moving || stage.isInsidePurpleWall(this.pos.x, this.pos.y) ) return false;
 
         let dx = 0;
         let dy = 0;

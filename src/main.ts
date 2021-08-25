@@ -37,20 +37,22 @@ const GRAY_TO_BLACK = [0b010101, -1, -1, -1];
 
 const CURSOR = [0, -1, 0b111000, 0b111101];
 
+const INTRO_FACE = [0, 0b100100, 0b111000, 0b111111];
+
 
 const PALETTE_1 = [
 
     // Line 1
     BRICK, BRICK, UFO1, UFO1, UFO1, UFO1, UFO1, UFO1,
     ROCK1, ROCK1, STAR, CROSS, ALIEN_GREEN_1, ALIEN_GREEN_2, ALIEN_GREEN_1, ALIEN_GREEN_2,
-    ALIEN_GREEN_1, ALIEN_GREEN_2,  FACE, FACE, PSTAR_1, PSTAR_2, CROSS, null,
-    null,  null,  null, null, null, null, null, null,
+    ALIEN_GREEN_1, ALIEN_GREEN_2,  FACE, FACE, PSTAR_1, PSTAR_2, CROSS, INTRO_FACE,
+    INTRO_FACE,  INTRO_FACE,  INTRO_FACE, INTRO_FACE, INTRO_FACE, INTRO_FACE, INTRO_FACE, null,
 
     // Line 2
     BRICK, BRICK, UFO2, UFO2, UFO2, UFO2, UFO2, UFO2,
     ROCK2, ROCK2, STAR, CROSS, ALIEN_GREEN_2, ALIEN_GREEN_2, ALIEN_GREEN_2, ALIEN_GREEN_2, 
-    ALIEN_GREEN_2, ALIEN_GREEN_2,  FACE, FACE, PSTAR_2, PSTAR_2, CURSOR, null,
-    null,  null,  null, null, null, null, null, null,
+    ALIEN_GREEN_2, ALIEN_GREEN_2,  FACE, FACE, PSTAR_2, PSTAR_2, CURSOR, INTRO_FACE,
+    INTRO_FACE,  INTRO_FACE,  INTRO_FACE, INTRO_FACE, INTRO_FACE, INTRO_FACE, INTRO_FACE, null,
 ];
 
 
@@ -128,6 +130,19 @@ const drawLogo = (canvas : HTMLCanvasElement, ctx : CanvasRenderingContext2D) : 
 }
 
 
+const drawStartIntro = (canvas : HTMLCanvasElement, ctx : CanvasRenderingContext2D) : void => {
+
+    ctx.textAlign = "center";
+    ctx.fillStyle = "white";
+
+    ctx.font = "9px Arial";
+    ctx.fillText("A game by", canvas.width/2, 84);
+
+    ctx.font = "14px Arial";
+    ctx.fillText("Jani Nykänen", canvas.width/2, 100);
+}
+
+
 window.onload = () => (new Core(160, 144))
     .run(AudioIntro, event => {
 
@@ -153,4 +168,5 @@ window.onload = () => (new Core(160, 144))
         event.data.generateBitmapFont("fontYellow", "Arial", 10, 256, 256, 0b111101);
         event.data.customDrawFunction("clear", 96, 56, drawStageClear, 80);
         event.data.customDrawFunction("logo", 128, 96, drawLogo, 80);
+        event.data.customDrawFunction("startIntro", 160, 144, drawStartIntro, 80);
     });

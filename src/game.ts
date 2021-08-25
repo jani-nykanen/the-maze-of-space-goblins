@@ -5,6 +5,7 @@ import { State } from "./keyboard.js";
 import { MAP_DATA } from "./mapdata.js";
 import { clamp } from "./math.js";
 import { Menu, MenuButton } from "./menu.js";
+import { SoundSource } from "./soundsrc.js";
 import { Stage } from "./stage.js";
 import { TitleScreen } from "./title.js";
 import { TransitionEffectType } from "./transition.js";
@@ -151,6 +152,7 @@ export class GameScene implements Scene {
 
         if (event.keyboard.getActionState("start") == State.Pressed) {
 
+            event.sound.playSequence(SoundSource.Pause, 0.60, "square");
             this.pauseMenu.activate(0);
             return;
         }
@@ -165,20 +167,14 @@ export class GameScene implements Scene {
 
         if (event.keyboard.getActionState("back") == State.Pressed) {
 
+            event.sound.playSequence(SoundSource.Choose, 0.60, "square");
             this.stage.undo();
         }
         else if (event.keyboard.getActionState("restart") == State.Pressed) {
 
+            event.sound.playSequence(SoundSource.Select, 0.60, "square");
             this.resetTransition(event);
         }
-        // TEMP !
-        /*
-        else if (event.keyboard.getActionState("fire") == State.Pressed) {
-
-            this.cleared = true;
-            this.clearTimer = CLEAR_LOGO_TIME + CLEAR_WAIT_TIME;
-        }
-        */
     }
 
 

@@ -6,4 +6,9 @@ export const SoundSource = {
     Choose : new Array<[number, number]> ([100, 6]),
     Select : new Array<[number, number]> ([112, 15]),
     IntroBeep : new Array<[number, number]> ([112, 10]),
+    MoveBeep : new Array<[number, number]> ([80, 6]),
+    Destroy : new Array<[number, number]> ([120, 4], [100, 6], [80, 10]),
+    Star : new Array<[number, number]> ([100, 4], [120, 6], [144, 10]),
+    ToggleWalls : new Array<[number, number]> ([90, 6], [120, 8]),
+    Pause : new Array<[number, number]> ([80, 6], [100, 8]),
 }
