@@ -18,6 +18,9 @@ const CLEAR_WAIT_TIME = 60;
 const START_TIME = 20;
 
 
+const HINT = "HINT: PRESS BACKSPACE TO UNDO A MOVE. ";
+
+
 export class GameScene implements Scene {
 
 
@@ -29,6 +32,7 @@ export class GameScene implements Scene {
     private cleared : boolean;
 
     private startTimer : number;
+    private hintPos : number;
 
 
     constructor(param : number, event : CoreEvent) {
@@ -53,8 +57,13 @@ export class GameScene implements Scene {
                 new MenuButton("CONTROLS",
                     () => {}
                 ),
-                //new MenuButton("AUDIO: OFF",
-                //    () => {}),
+                new MenuButton("AUDIO: " + (event.sound.isEnabled() ? "ON " : "OFF") ,
+                event => {
+
+                    event.sound.toggle(!event.sound.isEnabled());
+                    this.pauseMenu.changeButtonText(3, 
+                        "AUDIO: " + (event.sound.isEnabled() ? "ON " : "OFF"));
+                }),
                 new MenuButton("QUIT",
                     event => {
 
@@ -70,6 +79,8 @@ export class GameScene implements Scene {
 
         event.transition.activate(false, TransitionEffectType.CirleIn,
             1.0/30.0, null).setCenter(new Vector2(80, 72));
+
+        this.hintPos = 0;
     }
 
 
@@ -112,6 +123,8 @@ export class GameScene implements Scene {
 
     public update(event : CoreEvent) {
       
+        const HINT_POS_SPEED = 0.5;
+
         if (event.transition.isActive()) return;
 
         if (this.startTimer > 0) {
@@ -145,6 +158,8 @@ export class GameScene implements Scene {
         }
 
         if (this.pauseMenu.isActive()) {
+            
+            this.hintPos = (this.hintPos + HINT_POS_SPEED * event.step) % (HINT.length * 8);
 
             this.pauseMenu.update(event);
             return;
@@ -211,6 +226,8 @@ export class GameScene implements Scene {
 
         this.stage.draw(canvas);
 
+        let fontYellow = canvas.data.getBitmap("fontYellow");
+
         if (this.pauseMenu.isActive()) {
 
             canvas.setFillColor(0, 0, 0, 0.67);
@@ -219,9 +236,13 @@ export class GameScene implements Scene {
             this.pauseMenu.draw(canvas, 
                 0, 0, -8, 13, true);
 
-            canvas.drawText(canvas.data.getBitmap("font"),
-                "HINT: PRESS B.SPACE\nTO UNDO A MOVE.", -3, 144-24,
-                -8, -6);
+            for (let i = 0; i < 2; ++ i) {
+
+                canvas.drawText(fontYellow, HINT, 
+                    canvas.width/2 - this.hintPos + HINT.length*8*i, 
+                    144-16, 
+                    -8, 0, true);
+            }
         }
 
         if (this.cleared) {
@@ -234,7 +255,7 @@ export class GameScene implements Scene {
             canvas.setFillColor(0, 0, 0, 0.67);
             canvas.fillRect();
 
-            canvas.drawText(canvas.data.getBitmap("fontYellow"),
+            canvas.drawText(fontYellow,
                 "STAGE " + String(this.stage.index), 
                 canvas.width/2, canvas.height/2-8, 
                 -8, 0, true);

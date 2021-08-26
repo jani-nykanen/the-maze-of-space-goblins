@@ -43,7 +43,15 @@ export class TitleScreen implements Scene {
                 new MenuButton("CONTINUE",
                 event => {
                     this.startGame(false, event);
-                })
+                }),
+                new MenuButton("AUDIO: " + (event.sound.isEnabled() ? "ON " : "OFF") ,
+                event => {
+
+                    event.sound.toggle(!event.sound.isEnabled());
+                    this.menu.changeButtonText(2, 
+                        "AUDIO: " + (event.sound.isEnabled() ? "ON " : "OFF"));
+                }
+                )
             ]
         );
 
@@ -129,12 +137,12 @@ export class TitleScreen implements Scene {
     private drawLogo(canvas : Canvas) {
 
         const AMPLITUDE = 4.0;
-        const JUMP_Y = 128;
+        const JUMP_Y = 136;
 
         let logo = canvas.data.getBitmap("logo");
 
         let x = canvas.width/2 - logo.width/2;
-        let y = 16;
+        let y = 8;
 
         if (this.phase == 0) {
 
@@ -172,13 +180,13 @@ export class TitleScreen implements Scene {
             if (this.enterTimer < 0.5) {
 
                 canvas.drawText(canvas.data.getBitmap("fontYellow"), 
-                    "PRESS ENTER", midx, canvas.height-40, -9, 0, true);
+                    "PRESS ENTER", midx, canvas.height-44, -9, 0, true);
             }
         }
         else {
 
             this.menu.draw(canvas,
-                0, 32, -8, 13, true);
+                0, 28, -8, 13, true);
         }
 
         canvas.drawText(canvas.data.getBitmap("font"), 

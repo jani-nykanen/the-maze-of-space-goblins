@@ -92,7 +92,8 @@ export class Sound {
 
         this.timer = length;
 
-        this.gain.gain.setValueAtTime(clamp(this.globalVolume * vol, 0.001, 1.0), 0);
+        this.gain.gain.value = this.globalVolume * vol;
+        this.gain.gain.exponentialRampToValueAtTime(0.01, 1.0/60.0 * length);
 
         this.oscillator.connect(this.gain).connect(this.ctx.destination);
         this.oscillator.frequency.value = freq;
@@ -124,4 +125,7 @@ export class Sound {
 
         this.globalVolume = vol;
     }
+
+
+    public isEnabled = () : boolean => this.enabled;
 }

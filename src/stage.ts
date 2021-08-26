@@ -57,6 +57,7 @@ export class Stage {
     private data : Array<number>;
 
     private oldToggleState : boolean;
+    private toggleStateStack : Array<boolean>;
 
     public readonly width : number;
     public readonly height : number;
@@ -80,6 +81,7 @@ export class Stage {
 
         this.staticLayerStack = new Array<Array<number>> ();
         this.objectLayerStack = new Array<Array<number>> ();
+        this.toggleStateStack = new Array<boolean> ();
 
         this.checkMade = true;
         this.waitTimer = 0;
@@ -105,6 +107,9 @@ export class Stage {
             .map(i => (i >= 2 && i <= LAST_MONSTER+1 ? (i-1) : 0));
         this.objectLayerStack.length = 0;
         this.objectLayerStack.push(Array.from(this.objectLayer));
+
+        this.toggleStateStack.length = 0;
+        this.toggleStateStack.push(false);
 
         this.agents = new Array<Agent> ();
 
@@ -676,6 +681,7 @@ export class Stage {
 
         this.objectLayer = Array.from(this.objectLayerStack.pop());
         this.staticLayer = Array.from(this.staticLayerStack.pop());
+        this.oldToggleState = this.toggleStateStack.pop();
 
         let a : Agent;
 
@@ -707,6 +713,10 @@ export class Stage {
         this.staticLayerStack.push(Array.from(this.staticLayer));
         if (this.staticLayerStack.length > MAX_LENGTH)
             this.staticLayerStack.shift();
+
+        this.toggleStateStack.push(this.oldToggleState);
+        if (this.toggleStateStack.length > MAX_LENGTH)
+            this.toggleStateStack.shift(); 
     }
 
 

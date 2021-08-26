@@ -104,9 +104,8 @@ export class Menu {
         if (event.keyboard.getActionState("fire") == State.Pressed ||
             event.keyboard.getActionState("start") == State.Pressed) {
 
-            event.sound.playSequence(SoundSource.Select, 0.60, "square");
-
             activeButton.evaluateCallback(event);
+            event.sound.playSequence(SoundSource.Select, 0.60, "square");
         }
     }
 
