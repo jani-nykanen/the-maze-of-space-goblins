@@ -5,6 +5,7 @@ import { State } from "./keyboard.js";
 import { MAP_DATA } from "./mapdata.js";
 import { clamp } from "./math.js";
 import { Menu, MenuButton } from "./menu.js";
+import { drawBox } from "./misc.js";
 import { SoundSource } from "./soundsrc.js";
 import { Stage } from "./stage.js";
 import { TitleScreen } from "./title.js";
@@ -35,6 +36,9 @@ export class GameScene implements Scene {
     private hintPos : number;
 
 
+    private controlScreenActive : boolean;
+
+
     constructor(param : number, event : CoreEvent) {
 
         let startIndex = clamp(Number(param), 1, MAP_DATA.length);
@@ -55,7 +59,10 @@ export class GameScene implements Scene {
                     this.resetTransition(event);
                 }),
                 new MenuButton("CONTROLS",
-                    () => {}
+                    () => {
+
+                        this.controlScreenActive = true;
+                    }
                 ),
                 new MenuButton("AUDIO: " + (event.sound.isEnabled() ? "ON " : "OFF") ,
                 event => {
@@ -81,6 +88,7 @@ export class GameScene implements Scene {
             1.0/30.0, null).setCenter(new Vector2(80, 72));
 
         this.hintPos = 0;
+        this.controlScreenActive = false;
     }
 
 
@@ -130,6 +138,17 @@ export class GameScene implements Scene {
         if (this.startTimer > 0) {
 
             this.startTimer -= event.step;
+            return;
+        }
+
+        if (this.controlScreenActive) {
+
+            if (event.keyboard.isAnyPressed()) {
+
+                event.sound.playSequence(SoundSource.Select, 0.60, "square");
+                this.controlScreenActive = false;
+            }
+
             return;
         }
 
@@ -219,6 +238,24 @@ export class GameScene implements Scene {
     }
 
 
+    private drawControlsScreen(canvas : Canvas, y : number) {
+
+        canvas.setFillColor(0, 0, 0, 0.67);
+        canvas.fillRect();
+
+        drawBox(canvas, 0, y, 128, 96);
+
+        let font = canvas.data.getBitmap("font");
+        let fontYellow = canvas.data.getBitmap("fontYellow");
+
+        canvas.drawText(fontYellow, "CONTROLS:", canvas.width/2, 32, -8, 0, true);
+        canvas.drawText(font, "ARROW KEYS: MOVE", canvas.width/2, 32 + 16, -8, 0, true);
+        canvas.drawText(font, "BACKSPACE: UNDO", canvas.width/2, 32 + 32, -8, 0, true);
+        canvas.drawText(font, "R: RESTART", canvas.width/2, 32 + 48, -8, 0, true);
+        canvas.drawText(font, "ENTER: PAUSE", canvas.width/2, 32 + 64, -8, 0, true);
+    }
+
+
     public redraw(canvas : Canvas) {
 
         canvas.clear(0, 0, 0);
@@ -227,6 +264,12 @@ export class GameScene implements Scene {
         this.stage.draw(canvas);
 
         let fontYellow = canvas.data.getBitmap("fontYellow");
+
+        if (this.controlScreenActive) {
+
+            this.drawControlsScreen(canvas, 0);
+            return;
+        }
 
         if (this.pauseMenu.isActive()) {
 
