@@ -111,7 +111,7 @@ export class Menu {
 
 
     public draw(canvas : Canvas, x : number, y : number,
-        xoff = -9, yoff = 12, box = false) {
+        xoff = 0, yoff = 12, box = false) {
 
         if (!this.active) return;
 
@@ -120,7 +120,7 @@ export class Menu {
         let font = canvas.data.getBitmap("font");
         let fontYellow = canvas.data.getBitmap("fontYellow");
 
-        let w = (this.maxLength+1) * (16 + xoff);
+        let w = (this.maxLength+1) * (8 + xoff);
         let h = (this.buttons.length * yoff);
 
         let dx = canvas.width/2 - w / 2 + x;
@@ -128,8 +128,8 @@ export class Menu {
 
         if (box) {
 
-            drawBox(canvas, x, y, w, h);
-            dx -= 2;
+            drawBox(canvas, x, y-2, w, h);
+            // dx -= 2;
         }
 
         for (let i = 0; i < this.buttons.length; ++ i) {
@@ -140,9 +140,8 @@ export class Menu {
                 str = " " + str;
 
                 canvas.drawBitmapRegion(canvas.data.getBitmap("art1"),
-                    176, 8, 8, 8, dx + 2, dy + i * yoff + 3);
+                    176, 8, 8, 8, dx -1, dy + i * yoff );
             }
-            
 
             canvas.drawText(
                 i == this.cursorPos ? fontYellow : font, 

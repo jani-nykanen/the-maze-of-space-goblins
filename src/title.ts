@@ -180,17 +180,17 @@ export class TitleScreen implements Scene {
             if (this.enterTimer < 0.5) {
 
                 canvas.drawText(canvas.data.getBitmap("fontYellow"), 
-                    "PRESS ENTER", midx, canvas.height-44, -9, 0, true);
+                    "PRESS ENTER", midx, canvas.height-44, 0, 0, true);
             }
         }
         else {
 
             this.menu.draw(canvas,
-                0, 28, -8, 13, true);
+                0, 28, 0, 13, true);
         }
 
         canvas.drawText(canvas.data.getBitmap("font"), 
-            "©2021 JANI NYKÄNEN", midx, canvas.height-13, -9, 0, true);
+            "#2021 JANI NYK$NEN", midx, canvas.height-9, 0, 0, true);
     }
 
 

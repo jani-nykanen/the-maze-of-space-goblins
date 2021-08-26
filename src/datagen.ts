@@ -117,7 +117,7 @@ export class DataGenerator {
     }
 
 
-    private applyRGB222Palette(image : HTMLImageElement, paletteMap : Array<number[]>) : HTMLCanvasElement {
+    private applyRGB222Palette(image : HTMLImageElement, paletteMap : Array<number[]>, blackBorder = false) : HTMLCanvasElement {
 
         const TRANSPARENT = [-1, -1, -1, -1];
 
@@ -176,12 +176,17 @@ export class DataGenerator {
             }
         }
 
+        if (blackBorder) {
+
+            this.addBlackBorder(data, image.width, image.height);
+        }
+
         ctx.putImageData(data, 0, 0);
 
         return canvas;
     }
 
-
+/*
     public generateBitmapFont(name : string,
         font : string, size : number, width : number, height : number,
         color = 0b111111) {
@@ -213,13 +218,14 @@ export class DataGenerator {
         this.convertToRGB222(canvas, ctx, 80, true);
         this.bitmaps.push(new KeyValuePair<Bitmap> (name, canvas));
     }
+    */
 
 
     public generateColorBitmap(name : string, image : HTMLImageElement, 
-        paletteMap : Array<number[]>) {
+        paletteMap : Array<number[]>, blackBorder = false) {
 
         this.bitmaps.push(new KeyValuePair<Bitmap> (name, 
-            this.applyRGB222Palette(image, paletteMap) ));
+            this.applyRGB222Palette(image, paletteMap, blackBorder) ));
     }
 
 

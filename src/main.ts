@@ -136,10 +136,10 @@ const drawStartIntro = (canvas : HTMLCanvasElement, ctx : CanvasRenderingContext
     ctx.fillStyle = "white";
 
     ctx.font = "9px Arial";
-    ctx.fillText("A game by", canvas.width/2, 84);
+    ctx.fillText("A GAME BY", canvas.width/2, 84);
 
-    ctx.font = "14px Arial";
-    ctx.fillText("Jani Nykänen", canvas.width/2, 100);
+    ctx.font = "15px Arial";
+    ctx.fillText("JANI NYKÄNEN", canvas.width/2, 98);
 }
 
 
@@ -165,9 +165,16 @@ window.onload = () => (new Core(160, 144))
             event.data.generateColorBitmap("art3", img, PALETTE_3);
         });
 
-        event.data.generateBitmapFont("font", "Arial", 10, 256, 256);
-        event.data.generateBitmapFont("fontYellow", "Arial", 10, 256, 256, 0b111101);
+        //event.data.generateBitmapFont("font", "Arial", 10, 256, 256);
+        //event.data.generateBitmapFont("fontYellow", "Arial", 10, 256, 256, 0b111101);
         event.data.customDrawFunction("clear", 96, 56, drawStageClear, 80);
         event.data.customDrawFunction("logo", 128, 96, drawLogo, 80);
         event.data.customDrawFunction("startIntro", 160, 144, drawStartIntro, 80);
+
+
+        event.data.loadImage("font.png", img => {
+            
+            event.data.generateColorBitmap("font", img, (new Array(96)).fill([-1, 0, 0, 0b111111]), true);
+            event.data.generateColorBitmap("fontYellow", img, (new Array(96)).fill([-1, 0, 0, 0b111101]), true);
+        });
     });

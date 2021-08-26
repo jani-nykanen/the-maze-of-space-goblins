@@ -220,7 +220,7 @@ export class Canvas {
 
         if (center) {
 
-            dx -= ((str.length+1) * (cw + xoff))/ 2.0 ;
+            dx -= ((str.length) * (cw + xoff))/ 2.0 ;
             x = dx;
         }
 

@@ -14,9 +14,7 @@ export class AudioIntro implements Scene {
     static INITIAL_SAMPLE_VOLUME = 0.50;
     static INITIAL_MUSIC_VOLUME = 0.60;
 
-
     private yesNoMenu : Menu;
-    private readonly width : number;
 
 
     constructor(param : any, event : CoreEvent) {
@@ -41,9 +39,7 @@ export class AudioIntro implements Scene {
             ]
         );
 
-        this.yesNoMenu.activate(0);
-
-        this.width = Math.max(...TEXT.split('\n').map(s => s.length));
+        this.yesNoMenu.activate(1);
     }
 
 
@@ -58,9 +54,9 @@ export class AudioIntro implements Scene {
         canvas.clear(0, 85, 170);
 
         canvas.drawText(canvas.data.getBitmap("font"), TEXT,
-            16, 8, -8, -4, false);
+            16, 12, 0, 1, false);
 
-        this.yesNoMenu.draw(canvas, 0, 40, -8, 12);
+        this.yesNoMenu.draw(canvas, 0, 40, 0, 12);
     }
 
 

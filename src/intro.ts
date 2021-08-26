@@ -119,6 +119,9 @@ export class Intro implements Scene {
     }
 
 
+    private isWhitespace = (c : string) : boolean => ["\n", " ", "\t"].includes(c);
+
+
     public update(event : CoreEvent) {
 
         const CHAR_TIME = 4;
@@ -170,10 +173,11 @@ export class Intro implements Scene {
                 this.charIndex = STORY[this.phase][this.textIndex].length;
                 // event.sound.playSequence(SoundSource.Choose, 0.60, "sawtooth");
             }
-            else if ((this.charTimer += event.step) >= CHAR_TIME) {
+            else if ((this.charTimer += event.step) >= CHAR_TIME ||
+                this.isWhitespace(STORY[this.phase][this.textIndex]) ) {
 
                 ++ this.charIndex;
-                this.charTimer -= CHAR_TIME;
+                this.charTimer = 0;
             }
         }
         else {
@@ -203,7 +207,7 @@ export class Intro implements Scene {
         if (this.phase == 2) {
 
             canvas.drawText(font, "THE END",
-                canvas.width/2, canvas.height/2 - 8, -8, 0, true);
+                canvas.width/2, canvas.height/2 - 8, 0, 0, true);
             return;
         }
 
@@ -225,7 +229,7 @@ export class Intro implements Scene {
 
             canvas.drawText(font, 
                 STORY[this.phase][this.textIndex].substring(0, this.charIndex),
-                4, 64, -8, -5);
+                8, 66, 0, 2);
         }
     }
 

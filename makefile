@@ -25,6 +25,7 @@ closure:
 .PHONY: dist
 dist:
 	cp art.png temp/art.png
+	cp font.png temp/font.png
 	(cd temp; zip -r ../dist.zip .)
 	advzip -z dist.zip
 	rm -rf temp

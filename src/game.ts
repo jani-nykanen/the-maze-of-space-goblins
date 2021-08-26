@@ -17,6 +17,7 @@ import { Vector2 } from "./vector.js";
 const CLEAR_LOGO_TIME = 30;
 const CLEAR_WAIT_TIME = 60;
 const START_TIME = 20;
+const INITIAL_CONTROL_SCREEN_TIME = 30;
 
 
 const HINT = "HINT: PRESS BACKSPACE TO UNDO A MOVE. ";
@@ -35,8 +36,9 @@ export class GameScene implements Scene {
     private startTimer : number;
     private hintPos : number;
 
-
     private controlScreenActive : boolean;
+    private initialControlScreenTimer : number;
+    private initialControlScreenPhase : number;
 
 
     constructor(param : number, event : CoreEvent) {
@@ -89,6 +91,9 @@ export class GameScene implements Scene {
 
         this.hintPos = 0;
         this.controlScreenActive = false;
+
+        this.initialControlScreenTimer = 0;
+        this.initialControlScreenPhase = startIndex == 1 ? 3 : 0;
     }
 
 
@@ -134,6 +139,32 @@ export class GameScene implements Scene {
         const HINT_POS_SPEED = 0.5;
 
         if (event.transition.isActive()) return;
+
+        if (this.initialControlScreenPhase > 0) {
+
+            if (this.initialControlScreenPhase == 2) {
+
+                if (event.keyboard.isAnyPressed()) {
+
+                    -- this.initialControlScreenPhase;
+                    event.sound.playSequence(SoundSource.Select, 0.60, "square");
+                }
+            }
+            else {
+
+                if ((this.initialControlScreenTimer += event.step) >= INITIAL_CONTROL_SCREEN_TIME) {
+
+                    this.initialControlScreenTimer = 0;
+                    if ( (-- this.initialControlScreenPhase) == 0) {
+
+                        this.startTimer = 0;
+                    }
+                    
+                }
+            }
+
+            return;
+        }
 
         if (this.startTimer > 0) {
 
@@ -240,19 +271,26 @@ export class GameScene implements Scene {
 
     private drawControlsScreen(canvas : Canvas, y : number) {
 
-        canvas.setFillColor(0, 0, 0, 0.67);
-        canvas.fillRect();
+        if (this.startTimer <= 0) {
 
-        drawBox(canvas, 0, y, 128, 96);
+            canvas.setFillColor(0, 0, 0, 0.67);
+            canvas.fillRect();
+        }
+
+        drawBox(canvas, 0, y, 128, 80);
 
         let font = canvas.data.getBitmap("font");
         let fontYellow = canvas.data.getBitmap("fontYellow");
 
-        canvas.drawText(fontYellow, "CONTROLS:", canvas.width/2, 32, -8, 0, true);
-        canvas.drawText(font, "ARROW KEYS: MOVE", canvas.width/2, 32 + 16, -8, 0, true);
-        canvas.drawText(font, "BACKSPACE: UNDO", canvas.width/2, 32 + 32, -8, 0, true);
-        canvas.drawText(font, "R: RESTART", canvas.width/2, 32 + 48, -8, 0, true);
-        canvas.drawText(font, "ENTER: PAUSE", canvas.width/2, 32 + 64, -8, 0, true);
+        canvas.moveTo(0, y);
+
+        canvas.drawText(fontYellow, "CONTROLS:", canvas.width/2, 32, 0, 0, true);
+        canvas.drawText(font, "ARROW KEYS: MOVE", canvas.width/2, 32 + 16, 0, 0, true);
+        canvas.drawText(font, "BACKSPACE: UNDO", canvas.width/2, 32 + 32, 0, 0, true);
+        canvas.drawText(font, "R: RESTART", canvas.width/2, 32 + 48, 0, 0, true);
+        canvas.drawText(font, "ENTER: PAUSE", canvas.width/2, 32 + 64, 0, 0, true);
+
+        canvas.moveTo();
     }
 
 
@@ -265,9 +303,35 @@ export class GameScene implements Scene {
 
         let fontYellow = canvas.data.getBitmap("fontYellow");
 
-        if (this.controlScreenActive) {
+        if (this.startTimer > 0) {
 
-            this.drawControlsScreen(canvas, 0);
+            canvas.setFillColor(0, 0, 0, 0.67);
+            canvas.fillRect();
+
+            canvas.drawText(fontYellow,
+                "STAGE " + String(this.stage.index), 
+                canvas.width/2, canvas.height/2-8, 
+                0, 0, true);
+        }
+
+        let y : number;
+        let t : number;
+
+        if (this.controlScreenActive || this.initialControlScreenPhase > 0) {
+
+            y = 0;
+            t = this.initialControlScreenTimer / INITIAL_CONTROL_SCREEN_TIME;
+
+            if (this.initialControlScreenPhase == 1) {
+
+                y = -Math.round(t * 144);
+            }
+            else if (this.initialControlScreenPhase == 3) {
+
+                y = Math.round((1.0 - t) * 144);
+            }
+
+            this.drawControlsScreen(canvas, y);
             return;
         }
 
@@ -277,31 +341,20 @@ export class GameScene implements Scene {
             canvas.fillRect();
 
             this.pauseMenu.draw(canvas, 
-                0, 0, -8, 13, true);
+                0, 0, 0, 13, true);
 
             for (let i = 0; i < 2; ++ i) {
 
                 canvas.drawText(fontYellow, HINT, 
                     canvas.width/2 - this.hintPos + HINT.length*8*i, 
-                    144-16, 
-                    -8, 0, true);
+                    144-10, 
+                    0, 0, true);
             }
         }
 
         if (this.cleared) {
 
             this.drawClear(canvas);
-        }
-
-        if (this.startTimer > 0) {
-
-            canvas.setFillColor(0, 0, 0, 0.67);
-            canvas.fillRect();
-
-            canvas.drawText(fontYellow,
-                "STAGE " + String(this.stage.index), 
-                canvas.width/2, canvas.height/2-8, 
-                -8, 0, true);
         }
     }
     
