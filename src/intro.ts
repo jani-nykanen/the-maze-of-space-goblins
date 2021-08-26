@@ -65,6 +65,8 @@ export class Intro implements Scene {
 
     private ufoWave : number;
     private ufoPos : Vector2;
+    private movePhase : number;
+
     private dust : Array<Dust>;
     private dustTimer : number;
 
@@ -80,7 +82,9 @@ export class Intro implements Scene {
         this.background = new StarrySkyRenderer(new Vector2(-1.0, 0));
     
         this.ufoWave = 0;
-        this.ufoPos = new Vector2(80, 24);
+        this.ufoPos = new Vector2(-16, 24);
+        this.movePhase = 0;
+
         this.dust = new Array<Dust> ();
         this.dustTimer = 0;
 
@@ -121,6 +125,7 @@ export class Intro implements Scene {
         const CHAR_TIME = 4;
         const UFO_WAVE_SPEED = 0.025;
         const UFO_AMPLITUDE = 16;
+        const MOVE_SPEED = 1.0;
 
         this.background.update(event);
 
@@ -128,6 +133,31 @@ export class Intro implements Scene {
         this.ufoPos.y = 24 + Math.sin(this.ufoWave) * UFO_AMPLITUDE;
 
         this.updateDust(event);
+
+        if (this.movePhase == 1) {
+
+            if (event.transition.isActive()) return;
+
+            if ((this.ufoPos.x += MOVE_SPEED * event.step) > 160) {
+
+                event.transition.activate(true, TransitionEffectType.Fade,
+                    1.0/30.0, event => {
+
+                        if (this.phase == 0)
+                            event.changeScene(GameScene);
+                        else if (this.phase == 1)
+                            this.phase = 2;
+
+                    }, [0, 0, 0], 4); 
+            }
+            return;
+        }
+ 
+        if (this.movePhase == 0 && this.ufoPos.x < 80) {
+
+            this.ufoPos.x = Math.min(80, this.ufoPos.x + MOVE_SPEED*event.step);
+            return;
+        }
 
         if (event.transition.isActive() ||
             this.phase >= STORY.length) return;
@@ -151,15 +181,7 @@ export class Intro implements Scene {
 
                 if (++ this.textIndex == STORY[this.phase].length) {
 
-                    event.transition.activate(true, TransitionEffectType.Fade,
-                        1.0/30.0, event => {
-
-                            if (this.phase == 0)
-                                event.changeScene(GameScene);
-                            else if (this.phase == 1)
-                                this.phase = 2;
-
-                        }, [0, 0, 0], 4);
+                    this.movePhase = 1;
                 }
                 else {
 

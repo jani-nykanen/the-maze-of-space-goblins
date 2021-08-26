@@ -12,6 +12,8 @@ import { TransitionEffectType } from "./transition.js";
 import { Vector2 } from "./vector.js";
 
 
+const APPEAR_TIME = 90;
+
 
 export class TitleScreen implements Scene {
 
@@ -23,6 +25,8 @@ export class TitleScreen implements Scene {
     private phase : number;
     private enterTimer : number;
     private waveTimer : number;
+
+    private animTimer : number;
 
 
     constructor(param : any, event : CoreEvent) {
@@ -46,12 +50,14 @@ export class TitleScreen implements Scene {
         this.menu.activate();
         this.background = new StarrySkyRenderer();
 
-        this.phase = 0;
+        this.phase = param == null ? 0 : 1;
         this.enterTimer = 1.0;
 
         event.transition.activate(false,
             TransitionEffectType.Fade, 1.0/30.0, null,
             [0, 0, 0], 4);
+
+        this.animTimer = 0;
     }
 
 
@@ -89,9 +95,20 @@ export class TitleScreen implements Scene {
 
         this.waveTimer = (this.waveTimer + WAVE_SPEED*event.step) % (Math.PI*2);
 
+        if (this.phase == 0) {
+
+            this.background.setSpeed(0, -0.5);
+            if ((this.animTimer += event.step) >= APPEAR_TIME) {
+
+                ++ this.phase;
+                this.background.setSpeed(0, 0);
+            }
+            return;
+        }
+
         if (event.transition.isActive()) return;
 
-        if (this.phase == 0) {
+        if (this.phase == 1) {
 
             this.enterTimer = (this.enterTimer + ENTER_SPEED * event.step) % 1.0;
 
@@ -105,7 +122,6 @@ export class TitleScreen implements Scene {
             return;
         }
 
-
         this.menu.update(event);
     }
 
@@ -113,11 +129,17 @@ export class TitleScreen implements Scene {
     private drawLogo(canvas : Canvas) {
 
         const AMPLITUDE = 4.0;
+        const JUMP_Y = 128;
 
         let logo = canvas.data.getBitmap("logo");
 
         let x = canvas.width/2 - logo.width/2;
         let y = 16;
+
+        if (this.phase == 0) {
+
+            y += Math.round((1.0 - this.animTimer/APPEAR_TIME) * JUMP_Y);
+        }
 
         let step = (Math.PI*2) / logo.height;
         let dx : number;
@@ -140,9 +162,12 @@ export class TitleScreen implements Scene {
 
         this.drawLogo(canvas);
 
+        if (this.phase == 0)  
+            return;
+
         let midx = canvas.width/2;
 
-        if (this.phase == 0) {
+        if (this.phase == 1) {
 
             if (this.enterTimer < 0.5) {
 

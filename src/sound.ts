@@ -30,6 +30,7 @@ export class Sound {
     private soundSeq : Array<SoundSequence>;
     private seqVolume : number;
     private seqType : OscillatorType;
+    private globalVolume : number;
 
     private enabled : boolean;
 
@@ -47,6 +48,8 @@ export class Sound {
         this.timer = 0;
 
         this.enabled = false;
+
+        this.globalVolume = 1.0;
     }
 
 
@@ -89,7 +92,7 @@ export class Sound {
 
         this.timer = length;
 
-        this.gain.gain.setValueAtTime(clamp(vol, 0.001, 1.0), 0);
+        this.gain.gain.setValueAtTime(clamp(this.globalVolume * vol, 0.001, 1.0), 0);
 
         this.oscillator.connect(this.gain).connect(this.ctx.destination);
         this.oscillator.frequency.value = freq;
@@ -114,5 +117,11 @@ export class Sound {
     public toggle(state : boolean) {
 
         this.enabled = state;
+    }
+
+
+    public setGlobalVolume(vol : number) {
+
+        this.globalVolume = vol;
     }
 }

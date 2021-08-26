@@ -82,4 +82,11 @@ export class StarrySkyRenderer {
             this.darken(canvas, i, x, y);
         }
     }
+
+
+    public setSpeed(x : number, y : number) {
+
+        this.scrollSpeed.x = x;
+        this.scrollSpeed.y = y;
+    }
 }
