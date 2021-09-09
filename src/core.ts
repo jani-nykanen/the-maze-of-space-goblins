@@ -120,10 +120,6 @@ export class Core {
             this.activeScene.redraw(this.canvas);
             this.transition.draw(this.canvas);
         }
-        else {
-
-            // TODO: Some kind of loading screen?
-        }
 
         window.requestAnimationFrame(ts => this.loop(ts));
     }

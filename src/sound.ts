@@ -37,9 +37,9 @@ export class Sound {
 
     constructor() {
 
-        this.ctx = new AudioContext();
+        this.ctx = null;
         this.oscillator = null;
-        this.gain = new GainNode(this.ctx);
+        this.gain = null;
 
         this.soundSeq = new Array<SoundSequence> ();
         this.seqVolume = 1.0;
@@ -50,6 +50,13 @@ export class Sound {
         this.enabled = false;
 
         this.globalVolume = 1.0;
+    }
+
+
+    public createContext() {
+
+        this.ctx = new AudioContext();
+        this.gain = new GainNode(this.ctx);
     }
 
 
@@ -97,7 +104,7 @@ export class Sound {
         this.gain.gain.exponentialRampToValueAtTime(vol/2, 1.0/60.0 * length);
 
         this.oscillator.connect(this.gain).connect(this.ctx.destination);
-        this.oscillator.frequency.value = freq;
+        this.oscillator.frequency.setValueAtTime(freq, 0);
         this.oscillator.start(0);
     }
 

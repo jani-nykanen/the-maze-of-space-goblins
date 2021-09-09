@@ -147,7 +147,7 @@ window.onload = () => (new Core(160, 144))
     .run(AudioIntro, event => {
 
         event.sound.toggle(false);
-        event.sound.setGlobalVolume(0.60);
+        event.sound.setGlobalVolume(0.50);
 
         event.keyboard.addAction("left", "ArrowLeft")
             .addAction("up", "ArrowUp")

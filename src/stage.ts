@@ -194,8 +194,6 @@ export class Stage {
     
     private checkIfDestroyable(x : number, y : number, v : number, arr : Array<number>) : boolean {
 
-        // TODO: Repeating code, merge with above somehow?
-
         let dx : number;
         let dy : number;
 

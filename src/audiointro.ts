@@ -24,6 +24,7 @@ export class AudioIntro implements Scene {
                 new MenuButton("YES",
                     event => {
 
+                        event.sound.createContext();
                         event.sound.toggle(true);
 
                         event.changeScene(StartIntro);
@@ -32,6 +33,7 @@ export class AudioIntro implements Scene {
                 new MenuButton("NO",
                     event => {
 
+                        event.sound.createContext();
                         event.sound.toggle(false);
 
                         event.changeScene(StartIntro);
