@@ -13,7 +13,7 @@ import { Vector2 } from "./vector.js";
 const STORY = [
 [
 `YOU ARE A SPACE 
-TRAVELLER FROM A
+TRAVELER FROM A
 FAR AWAY PLANET.
 YOU ARE LOST IN
 A MYSTERIOUS
